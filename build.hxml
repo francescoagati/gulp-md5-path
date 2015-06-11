@@ -1,8 +1,7 @@
 -cp src
--js dist/gulp-md5.path.js
+-js dist/gulp-md5-path.js
 -main Main
 -dce full
 -D analyzer
 -lib hxnodejs slambda thx.core jsrequire
--xml dist/md5.xml
 --macro jsrequire.JSRequire.npmInstall(true)
