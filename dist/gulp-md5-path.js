@@ -1,5 +1,8 @@
 (function (console, $hx_exports) { "use strict";
 var EventStream = require("event-stream");
+var Main = function() { };
+Main.main = function() {
+};
 var md5 = $hx_exports.md5 = function() { };
 md5.map_file = function(file,cb) {
 	var md5 = js_node_Crypto.createHash("md5");
@@ -13,9 +16,6 @@ md5.map_file = function(file,cb) {
 };
 md5.task = function(options) {
 	return EventStream.map(md5.map_file);
-};
-var Main = function() { };
-Main.main = function() {
 };
 var js_node_Crypto = require("crypto");
 Main.main();
