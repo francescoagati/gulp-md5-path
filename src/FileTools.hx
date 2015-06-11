@@ -3,6 +3,7 @@ import js.node.Crypto;
 import js.node.Buffer;
 using FileTools;
 
+
 class FileTools {
   public static inline function toString(file:File):String {
     return file.contents.toString();
@@ -20,4 +21,7 @@ class FileTools {
     file.path= '${splits.slice(0,-1).join("/")}/${basename[0]}-${md5_suffix}.${basename.slice(1).join('.')}';
     return file;
   }
+
+
+
 }

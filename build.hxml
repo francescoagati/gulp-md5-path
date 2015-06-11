@@ -5,3 +5,4 @@
 -D analyzer
 -lib hxnodejs slambda thx.core jsrequire
 --macro jsrequire.JSRequire.npmInstall(true)
+--no-traces
