@@ -1,7 +1,8 @@
 import Externs;
 using FileTools;
 using StringTools;
-
+using Manifest.PathTools;
+using thx.Arrays;
 
 enum TypePath {
   http(path:Path);
@@ -14,10 +15,7 @@ enum TypePath {
 
   @:from public inline static function fromString(s:String):Path return new Path(s);
 
-  public inline function getType() {
-    return if (this.indexOf('http') >= 0 ) TypePath.http(this)
-      else TypePath.file(this);
-  }
+
 }
 
 
@@ -31,6 +29,26 @@ enum TypePath {
 
 
 class PathTools{
+
+  public static inline function getType(path:Path) {
+    return if (path.isHttp()) TypePath.http(path)
+      else TypePath.file(path);
+  }
+
+  public inline static function baseName(path:Path) {
+    return path.split("/").last().split(".").first();
+  }
+
+  public inline static function basePath(path:Path) {
+    return path.split("/").slice(0,1).join("/");
+  }
+
+  public inline static function extension(path:Path) {
+    return path.split('/').last().split(".").last();
+  }
+
+  public inline static function isHttp(path:Path) return path.indexOf('http') >= 0;
+
   public inline static function processPath(path:Path) {
 
     return switch (path.getType()) {
