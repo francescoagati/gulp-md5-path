@@ -69,6 +69,14 @@ EReg.prototype = {
 		return buf.toString();
 	}
 };
+var _$Externs_AFile_$Impl_$ = {};
+_$Externs_AFile_$Impl_$.__name__ = true;
+_$Externs_AFile_$Impl_$._new = function(f) {
+	return f;
+};
+_$Externs_AFile_$Impl_$.fromVinyl = function(v) {
+	return v;
+};
 var EventStream = require("event-stream");
 var FileTools = function() { };
 FileTools.__name__ = true;

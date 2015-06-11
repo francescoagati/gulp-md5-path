@@ -5,11 +5,11 @@ using FileTools;
 
 
 class FileTools {
-  public static inline function toString(file:File):String {
+  public static inline function toString(file:AFile):String {
     return file.contents.toString();
   }
 
-  public static inline function toMd5(file:File):File {
+  public static inline function toMd5(file:AFile):AFile {
     var md5 = Crypto.createHash('md5');
     md5.update(file.toString());
     var md5_suffix = md5.digest('hex');

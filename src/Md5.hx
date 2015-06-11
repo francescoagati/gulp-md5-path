@@ -6,7 +6,7 @@ using thx.Arrays;
 using thx.Functions;
 
 @:keep @:expose @:native('md5') class Md5 {
-  static inline function map_file(file:File,cb) {
+  static inline function map_file(file:AFile,cb) {
     file.toMd5();
     cb(null,file);
   };
