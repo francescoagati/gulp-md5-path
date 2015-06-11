@@ -1,0 +1,27 @@
+{
+  "name": "gulp-md5-path",
+  "version": "0.0.0",
+  "description": "gulp md5 path rewriter",
+  "main": "dist/gulp-md5-path.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },  
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/francescoagati/gulp-md5-path.git"
+  },
+  "keywords": [
+    "gulp",
+    "md5"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/francescoagati/gulp-md5-path/issues"
+  },
+  "homepage": "https://github.com/francescoagati/gulp-md5-path",
+  "dependencies": {
+    "util": "^0.10.3",
+    "event-stream": "^3.3.1"
+  }
+}
