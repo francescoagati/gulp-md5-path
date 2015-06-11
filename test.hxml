@@ -1,0 +1,9 @@
+-cp src
+-cp test
+-js dist/test.js
+-debug
+-main Test
+--no-inline
+-lib hxnodejs slambda thx.core jsrequire sure
+--macro jsrequire.JSRequire.npmInstall(true)
+-cmd node dist/test.js
