@@ -1,5 +1,8 @@
 import Externs;
 import Manifest;
+import com.dongxiguo.continuation.Continuation;
+
+
 using FileTools;
 using StringTools;
 using Manifest.PathTools;
@@ -10,8 +13,6 @@ using Reflect;
 using ProcessManifest.DynamicTools;
 using Lambda;
 using Utils;
-
-@:expose  @:keep  @:native('manifest')
 
 class DynamicTools {
   public static inline function isJsArray(o:Dynamic):Bool {
@@ -24,37 +25,45 @@ class DynamicTools {
 
 }
 
+@:expose  @:keep  @:native('manifest')
+@:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
+class ProcessManifest {
 
-@:tink class ProcessManifest {
 
-
-
-
-  static inline function processManifest(paths:Paths) {
-    return [ for (path in paths)
-      switch (path.getType()) {
-        case http(path):path;
-        case file(path):path;
-        case _:null;
-      }];
+  @:async static inline function processManifest(paths:Paths) {
+    return [
+      @fork(path in paths) {
+        switch (path.getType()) {
+          case http(path):path;
+          case file(path):
+            trace(path);
+            path;
+          case _:null;
+      }
+    }];
   }
 
-  static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>) {
+  @:async static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>) {
     for (key in json.keys()) {
       var obj = json.get(key);
-      if (obj.isJsArray()) json.set(key,processManifest(obj));
-      else if (obj.isJsObject()) traverseJson(obj);
+      if (obj.isJsArray()) {
+        var new_obj = @await processManifest(obj);
+        json.set(key,new_obj);
+      }
+      else if (obj.isJsObject()) @await traverseJson(obj);
     }
-
     return json;
 
   }
 
   public static inline function map_manifest(file:File,cb) {
-    var json = file.toJson();
-    traverseJson(json);
-    file.setContent(haxe.Json.stringify(json));
-    cb(null,file);
+    Continuation.cpsFunction(function asyncTest():Void {
+      var json = file.toJson();
+      json = @await traverseJson(json);
+      file.setContent(haxe.Json.stringify(json));
+      cb(null,file);
+    });
+    asyncTest(function() {});
   };
 
   public static inline function task(?options) {

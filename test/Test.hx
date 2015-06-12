@@ -13,7 +13,7 @@ using thx.Functions;
 using buddy.Should;
 using Manifest.PathTools;
 using VinylTools;
-
+using Utils;
 
 // Add test suites within the brackets
 class Test implements Buddy<[Tests]> {
@@ -55,7 +55,7 @@ class Tests extends BuddySuite {
         });
 
         it("manifest changed",{
-          trace(fileResult);
+          trace(fileResult.pretty());
           (file).should.not.be(fileResult);
         });
 

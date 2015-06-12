@@ -99,6 +99,9 @@ FileTools.toMd5 = function(file) {
 	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
 	return file;
 };
+FileTools.setContent = function(file,content) {
+	file.contents = new js_node_buffer_Buffer(content);
+};
 var HxOverrides = function() { };
 HxOverrides.__name__ = ["HxOverrides"];
 HxOverrides.cca = function(s,index) {
@@ -225,48 +228,120 @@ md5.map_file = function(file,cb) {
 md5.task = function(options) {
 	return EventStream.map(md5.map_file);
 };
-var manifest = $hx_exports.manifest = function() { };
-manifest.__name__ = ["manifest"];
-manifest.isJsArray = function(o) {
+var DynamicTools = function() { };
+DynamicTools.__name__ = ["DynamicTools"];
+DynamicTools.isJsArray = function(o) {
 	return toString.call(o) === "[object Array]";
 };
-manifest.isJsObject = function(a) {
+DynamicTools.isJsObject = function(a) {
 	return (!!a) && (a.constructor === Object);
 };
-var ProcessManifest = function() { };
-ProcessManifest.__name__ = ["ProcessManifest"];
-ProcessManifest.processManifest = function(paths) {
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < paths.length) {
-		var path = paths[_g1];
-		++_g1;
-		_g.push(PathTools.baseName(path));
+var manifest = $hx_exports.manifest = function() { };
+manifest.__name__ = ["manifest"];
+manifest.processManifest = function(paths,__return) {
+	var __iterator = 0;
+	if(__iterator < paths.length) {
+		var __results = [];
+		var __counter = 1;
+		var __i = 0;
+		var __checkCounter = function() {
+			if(--__counter == 0) __return(__results);
+		};
+		do {
+			var path = paths[__iterator++];
+			var __index = [__i];
+			__counter++;
+			var __endSwitch_0 = (function(__index) {
+				return function(__endSwitch_0_parameter_0) {
+					__results[__index[0]] = __endSwitch_0_parameter_0;
+					__checkCounter();
+					return;
+				};
+			})(__index);
+			{
+				var _g = PathTools.getType(path);
+				switch(Type.enumIndex(_g)) {
+				case 0:
+					var path1 = _g[2];
+					path1;
+					__endSwitch_0(path1);
+					break;
+				case 1:
+					var path2 = _g[2];
+					console.log(path2);
+					path2;
+					__endSwitch_0(path2);
+					break;
+				default:
+					__endSwitch_0(null);
+				}
+			}
+			__i++;
+		} while(__iterator < paths.length);
+		__checkCounter();
 	}
-	return _g;
 };
-ProcessManifest.traverseJson = function(json) {
-	var _g = 0;
-	var _g1 = Reflect.fields(json);
-	while(_g < _g1.length) {
-		var key = _g1[_g];
-		++_g;
-		var obj = json[key];
-		if(manifest.isJsArray(obj)) {
-			var value = ProcessManifest.processManifest(obj);
-			json[key] = value;
-		} else if(manifest.isJsObject(obj)) ProcessManifest.traverseJson(obj);
-	}
-	Utils.pretty(json);
-	return json;
+manifest.traverseJson = function(json,__return) {
+	var __iterator = 0;
+	var __doCount = 0;
+	var __break_1 = function() {
+		__return(json);
+	};
+	var __continue_0;
+	var __continue_01 = null;
+	__continue_01 = function() {
+		var __do = function() {
+			var __break = function() {
+				__break_1();
+			};
+			var __continue = function() {
+				__continue_01();
+			};
+			if(__doCount++ == 0) do (function(key) {
+				key;
+				(function(obj) {
+					obj;
+					var __endIf_1 = function() {
+						__continue_01();
+						return;
+					};
+					if(DynamicTools.isJsArray(obj)) (function(__afterVar_5) {
+						manifest.processManifest(obj,function(__parameter_6) {
+							__afterVar_5(__parameter_6);
+						});
+					})(function(new_obj) {
+						new_obj;
+						json[key] = new_obj;
+						__endIf_1();
+					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,function(__parameter_4) {
+						__parameter_4;
+						__endIf_1();
+					}); else __endIf_1();
+				})(json[key]);
+			})(Reflect.fields(json)[__iterator++]); while(--__doCount != 0);
+		};
+		if(__iterator < Reflect.fields(json).length) __do(); else __break_1();
+	};
+	__continue_0 = __continue_01;
+	__continue_0();
 };
-ProcessManifest.map_manifest = function(file,cb) {
-	var json = FileTools.toJson(file);
-	ProcessManifest.traverseJson(json);
-	cb(null,file);
+manifest.map_manifest = function(file,cb) {
+	var asyncTest = function(__return) {
+		(function(json) {
+			json;
+			manifest.traverseJson(json,function(__parameter_8) {
+				json = __parameter_8;
+				FileTools.setContent(file,JSON.stringify(json));
+				cb(null,file);
+				__return();
+			});
+		})(FileTools.toJson(file));
+	};
+	asyncTest(function() {
+	});
 };
-ProcessManifest.task = function(options) {
-	return EventStream.map(ProcessManifest.map_manifest);
+manifest.task = function(options) {
+	return EventStream.map(manifest.map_manifest);
 };
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
@@ -477,6 +552,10 @@ Utils.pretty = function(obj) {
 	p(obj);
 	return obj;
 };
+var com_dongxiguo_continuation_Continuation = function() { };
+com_dongxiguo_continuation_Continuation.__name__ = ["com","dongxiguo","continuation","Continuation"];
+var com_dongxiguo_continuation_ContinuationDetail = function() { };
+com_dongxiguo_continuation_ContinuationDetail.__name__ = ["com","dongxiguo","continuation","ContinuationDetail"];
 var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe_StackItem.CFunction = ["CFunction",0];
 haxe_StackItem.CFunction.toString = $estr;
@@ -812,6 +891,7 @@ js_Boot.__resolveNativeClass = function(name) {
 	return (Function("return typeof " + name + " != \"undefined\" ? " + name + " : null"))();
 };
 var js_node_Crypto = require("crypto");
+var js_node_buffer_Buffer = require("buffer").Buffer;
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = ["thx","Arrays"];
 thx_Arrays.after = function(array,element) {

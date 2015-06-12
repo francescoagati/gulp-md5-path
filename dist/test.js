@@ -320,49 +320,107 @@ manifest.isJsObject = function(a) {
 };
 var ProcessManifest = function() { };
 ProcessManifest.__name__ = ["ProcessManifest"];
-ProcessManifest.processManifest = function(paths) {
-	var __tmp = [];
-	var _g = 0;
-	while(_g < paths.length) {
-		var path = paths[_g];
-		++_g;
-		{
-			var _g1 = PathTools.getType(path);
-			switch(Type.enumIndex(_g1)) {
-			case 0:
-				var path1 = _g1[2];
-				__tmp.push(path1);
-				break;
-			case 1:
-				var path2 = _g1[2];
-				__tmp.push(path2);
-				break;
-			default:
-				__tmp.push(null);
+ProcessManifest.processManifest = function(paths,__return) {
+	var __iterator = 0;
+	if(__iterator < paths.length) {
+		var __results = [];
+		var __counter = 1;
+		var __i = 0;
+		var __checkCounter = function() {
+			if(--__counter == 0) __return(__results);
+		};
+		do {
+			var path = paths[__iterator++];
+			var __index = [__i];
+			__counter++;
+			var __endSwitch_1 = (function(__index) {
+				return function(__endSwitch_1_parameter_0) {
+					__results[__index[0]] = __endSwitch_1_parameter_0;
+					__checkCounter();
+					return;
+				};
+			})(__index);
+			{
+				var _g = PathTools.getType(path);
+				switch(Type.enumIndex(_g)) {
+				case 0:
+					var path1 = _g[2];
+					path1;
+					__endSwitch_1(path1);
+					break;
+				case 1:
+					var path2 = _g[2];
+					haxe_Log.trace(path2,{ fileName : "ProcessManifest.hx", lineNumber : 40, className : "ProcessManifest", methodName : "processManifest"});
+					path2;
+					__endSwitch_1(path2);
+					break;
+				default:
+					__endSwitch_1(null);
+				}
 			}
-		}
+			__i++;
+		} while(__iterator < paths.length);
+		__checkCounter();
 	}
-	return __tmp;
 };
-ProcessManifest.traverseJson = function(json) {
-	var _g = 0;
-	var _g1 = Reflect.fields(json);
-	while(_g < _g1.length) {
-		var key = _g1[_g];
-		++_g;
-		var obj = json[key];
-		if(manifest.isJsArray(obj)) {
-			var value = ProcessManifest.processManifest(obj);
-			json[key] = value;
-		} else if(manifest.isJsObject(obj)) ProcessManifest.traverseJson(obj);
-	}
-	return json;
+ProcessManifest.traverseJson = function(json,__return) {
+	var __iterator = 0;
+	var __doCount = 0;
+	var __break_2 = function() {
+		__return(json);
+	};
+	var __continue_1;
+	var __continue_11 = null;
+	__continue_11 = function() {
+		var __do = function() {
+			var __break = function() {
+				__break_2();
+			};
+			var __continue = function() {
+				__continue_11();
+			};
+			if(__doCount++ == 0) do (function(key) {
+				key;
+				(function(obj) {
+					obj;
+					var __endIf_0 = function() {
+						__continue_11();
+						return;
+					};
+					if(manifest.isJsArray(obj)) (function(__afterVar_6) {
+						ProcessManifest.processManifest(obj,function(__parameter_7) {
+							__afterVar_6(__parameter_7);
+						});
+					})(function(new_obj) {
+						new_obj;
+						json[key] = new_obj;
+						__endIf_0();
+					}); else if(manifest.isJsObject(obj)) ProcessManifest.traverseJson(obj,function(__parameter_5) {
+						__parameter_5;
+						__endIf_0();
+					}); else __endIf_0();
+				})(json[key]);
+			})(Reflect.fields(json)[__iterator++]); while(--__doCount != 0);
+		};
+		if(__iterator < Reflect.fields(json).length) __do(); else __break_2();
+	};
+	__continue_1 = __continue_11;
+	__continue_1();
 };
 ProcessManifest.map_manifest = function(file,cb) {
-	var json = FileTools.toJson(file);
-	ProcessManifest.traverseJson(json);
-	FileTools.setContent(file,JSON.stringify(json));
-	cb(null,file);
+	var asyncTest = function(__return) {
+		(function(json) {
+			json;
+			ProcessManifest.traverseJson(json,function(__parameter_8) {
+				json = __parameter_8;
+				FileTools.setContent(file,JSON.stringify(json));
+				cb(null,file);
+				__return();
+			});
+		})(FileTools.toJson(file));
+	};
+	asyncTest(function() {
+	});
 };
 ProcessManifest.task = function(options) {
 	return EventStream.map(ProcessManifest.map_manifest);
@@ -635,7 +693,7 @@ var Tests = function() {
 			});
 		});
 		_g.syncIt("manifest changed",function(__asyncDone1,__status2) {
-			haxe_Log.trace(fileResult,{ fileName : "Test.hx", lineNumber : 58, className : "Tests", methodName : "new"});
+			haxe_Log.trace(Utils.pretty(fileResult),{ fileName : "Test.hx", lineNumber : 58, className : "Tests", methodName : "new"});
 			buddy_ShouldDynamic.should(TypePath.file,__status2).get_not().be(fileResult,{ fileName : "Test.hx", lineNumber : 59, className : "Tests", methodName : "new"});
 		});
 	});
@@ -1490,6 +1548,10 @@ buddy_tools_AsyncTools.next = function(it,action,def,resolveWith) {
 		});
 	}
 };
+var com_dongxiguo_continuation_Continuation = function() { };
+com_dongxiguo_continuation_Continuation.__name__ = ["com","dongxiguo","continuation","Continuation"];
+var com_dongxiguo_continuation_ContinuationDetail = function() { };
+com_dongxiguo_continuation_ContinuationDetail.__name__ = ["com","dongxiguo","continuation","ContinuationDetail"];
 var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe_StackItem.CFunction = ["CFunction",0];
 haxe_StackItem.CFunction.toString = $estr;
