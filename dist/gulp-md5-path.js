@@ -48,6 +48,9 @@ md5.task = function(options) {
 };
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = true;
+manifest.processFile = function(path,__return) {
+	__return(path);
+};
 manifest.processManifest = function(paths,__return) {
 	var __iterator = 0;
 	if(0 < paths.length) {
@@ -71,7 +74,6 @@ manifest.processManifest = function(paths,__return) {
 					break;
 				case 1:
 					var path2 = _g[2];
-					console.log(path2);
 					__results[__index] = path2;
 					__checkCounter();
 					break;
@@ -90,8 +92,8 @@ manifest.traverseJson = function(json,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
 	var tmp;
-	var __continue_01 = null;
-	__continue_01 = function() {
+	var __continue_11 = null;
+	__continue_11 = function() {
 		if(__iterator < Reflect.fields(json).length) {
 			if(__doCount++ == 0) while(true) {
 				var key = [Reflect.fields(json)[__iterator++]];
@@ -100,12 +102,12 @@ manifest.traverseJson = function(json,__return) {
 				obj;
 				var __endIf_1 = [(function() {
 					return function() {
-						__continue_01();
+						__continue_11();
 						return;
 					};
 				})()];
 				if(toString.call(o) === "[object Array]") {
-					var __afterVar_5 = [(function(__endIf_1,key) {
+					var __afterVar_6 = [(function(__endIf_1,key) {
 						return function(new_obj) {
 							new_obj;
 							json[key[0]] = new_obj;
@@ -113,11 +115,11 @@ manifest.traverseJson = function(json,__return) {
 						};
 					})(__endIf_1,key)];
 					var paths = obj;
-					var __return1 = [(function(__afterVar_5) {
-						return function(__parameter_6) {
-							__afterVar_5[0](__parameter_6);
+					var __return1 = [(function(__afterVar_6) {
+						return function(__parameter_7) {
+							__afterVar_6[0](__parameter_7);
 						};
-					})(__afterVar_5)];
+					})(__afterVar_6)];
 					var __iterator1 = 0;
 					if(__iterator1 < paths.length) {
 						var __results = [[]];
@@ -143,7 +145,6 @@ manifest.traverseJson = function(json,__return) {
 									break;
 								case 1:
 									var path2 = _g[2];
-									console.log(path2);
 									path2;
 									__results[0][__index] = path2;
 									__checkCounter();
@@ -159,8 +160,8 @@ manifest.traverseJson = function(json,__return) {
 						__checkCounter();
 					}
 				} else if((!!a) && (a.constructor === Object)) manifest.traverseJson(obj,(function(__endIf_1) {
-					return function(__parameter_4) {
-						__parameter_4;
+					return function(__parameter_5) {
+						__parameter_5;
 						__endIf_1[0]();
 					};
 				})(__endIf_1)); else __endIf_1[0]();
@@ -168,17 +169,17 @@ manifest.traverseJson = function(json,__return) {
 			}
 		} else __return(json);
 	};
-	tmp = __continue_01;
-	var __continue_0 = tmp;
-	__continue_0();
+	tmp = __continue_11;
+	var __continue_1 = tmp;
+	__continue_1();
 };
 manifest.map_manifest = function(file,cb) {
 	var asyncTest = function(__return) {
 		var json = JSON.parse(file.contents.toString());
 		json;
 		var json1 = json;
-		var __return1 = function(__parameter_8) {
-			json = __parameter_8;
+		var __return1 = function(__parameter_9) {
+			json = __parameter_9;
 			var content = JSON.stringify(json);
 			file.contents = new js_node_buffer_Buffer(content);
 			cb(null,file);
@@ -187,8 +188,8 @@ manifest.map_manifest = function(file,cb) {
 		var __iterator = 0;
 		var __doCount = 0;
 		var tmp;
-		var __continue_01 = null;
-		__continue_01 = function() {
+		var __continue_11 = null;
+		__continue_11 = function() {
 			if(__iterator < Reflect.fields(json1).length) {
 				if(__doCount++ == 0) while(true) {
 					var key = [Reflect.fields(json1)[__iterator++]];
@@ -197,12 +198,12 @@ manifest.map_manifest = function(file,cb) {
 					obj;
 					var __endIf_1 = [(function() {
 						return function() {
-							__continue_01();
+							__continue_11();
 							return;
 						};
 					})()];
 					if(toString.call(o) === "[object Array]") {
-						var __afterVar_5 = [(function(__endIf_1,key) {
+						var __afterVar_6 = [(function(__endIf_1,key) {
 							return function(new_obj) {
 								new_obj;
 								json1[key[0]] = new_obj;
@@ -210,11 +211,11 @@ manifest.map_manifest = function(file,cb) {
 							};
 						})(__endIf_1,key)];
 						var paths = obj;
-						var __return2 = [(function(__afterVar_5) {
-							return function(__parameter_6) {
-								__afterVar_5[0](__parameter_6);
+						var __return2 = [(function(__afterVar_6) {
+							return function(__parameter_7) {
+								__afterVar_6[0](__parameter_7);
 							};
-						})(__afterVar_5)];
+						})(__afterVar_6)];
 						var __iterator1 = 0;
 						if(__iterator1 < paths.length) {
 							var __results = [[]];
@@ -240,7 +241,6 @@ manifest.map_manifest = function(file,cb) {
 										break;
 									case 1:
 										var path2 = _g[2];
-										console.log(path2);
 										path2;
 										__results[0][__index] = path2;
 										__checkCounter();
@@ -256,8 +256,8 @@ manifest.map_manifest = function(file,cb) {
 							__checkCounter();
 						}
 					} else if((!!a) && (a.constructor === Object)) manifest.traverseJson(obj,(function(__endIf_1) {
-						return function(__parameter_4) {
-							__parameter_4;
+						return function(__parameter_5) {
+							__parameter_5;
 							__endIf_1[0]();
 						};
 					})(__endIf_1)); else __endIf_1[0]();
@@ -265,9 +265,9 @@ manifest.map_manifest = function(file,cb) {
 				}
 			} else __return1(json1);
 		};
-		tmp = __continue_01;
-		var __continue_0 = tmp;
-		__continue_0();
+		tmp = __continue_11;
+		var __continue_1 = tmp;
+		__continue_1();
 	};
 	asyncTest(function() {
 	});

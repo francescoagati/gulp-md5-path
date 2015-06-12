@@ -238,6 +238,9 @@ DynamicTools.isJsObject = function(a) {
 };
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = ["manifest"];
+manifest.processFile = function(path,__return) {
+	__return(path);
+};
 manifest.processManifest = function(paths,__return) {
 	var __iterator = 0;
 	if(__iterator < paths.length) {
@@ -251,29 +254,32 @@ manifest.processManifest = function(paths,__return) {
 			var path = paths[__iterator++];
 			var __index = [__i];
 			__counter++;
-			var __endSwitch_0 = (function(__index) {
+			var __endSwitch_0 = [(function(__index) {
 				return function(__endSwitch_0_parameter_0) {
 					__results[__index[0]] = __endSwitch_0_parameter_0;
 					__checkCounter();
 					return;
 				};
-			})(__index);
+			})(__index)];
 			{
 				var _g = PathTools.getType(path);
 				switch(Type.enumIndex(_g)) {
 				case 0:
 					var path1 = _g[2];
 					path1;
-					__endSwitch_0(path1);
+					__endSwitch_0[0](path1);
 					break;
 				case 1:
 					var path2 = _g[2];
-					console.log(path2);
-					path2;
-					__endSwitch_0(path2);
+					manifest.processFile(path2,(function(__endSwitch_0) {
+						return function(__parameter_0) {
+							__parameter_0;
+							__endSwitch_0[0](__parameter_0);
+						};
+					})(__endSwitch_0));
 					break;
 				default:
-					__endSwitch_0(null);
+					__endSwitch_0[0](null);
 				}
 			}
 			__i++;
@@ -284,53 +290,53 @@ manifest.processManifest = function(paths,__return) {
 manifest.traverseJson = function(json,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
-	var __break_1 = function() {
+	var __break_2 = function() {
 		__return(json);
 	};
-	var __continue_0;
-	var __continue_01 = null;
-	__continue_01 = function() {
+	var __continue_1;
+	var __continue_11 = null;
+	__continue_11 = function() {
 		var __do = function() {
 			var __break = function() {
-				__break_1();
+				__break_2();
 			};
 			var __continue = function() {
-				__continue_01();
+				__continue_11();
 			};
 			if(__doCount++ == 0) do (function(key) {
 				key;
 				(function(obj) {
 					obj;
 					var __endIf_1 = function() {
-						__continue_01();
+						__continue_11();
 						return;
 					};
-					if(DynamicTools.isJsArray(obj)) (function(__afterVar_5) {
-						manifest.processManifest(obj,function(__parameter_6) {
-							__afterVar_5(__parameter_6);
+					if(DynamicTools.isJsArray(obj)) (function(__afterVar_6) {
+						manifest.processManifest(obj,function(__parameter_7) {
+							__afterVar_6(__parameter_7);
 						});
 					})(function(new_obj) {
 						new_obj;
 						json[key] = new_obj;
 						__endIf_1();
-					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,function(__parameter_4) {
-						__parameter_4;
+					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,function(__parameter_5) {
+						__parameter_5;
 						__endIf_1();
 					}); else __endIf_1();
 				})(json[key]);
 			})(Reflect.fields(json)[__iterator++]); while(--__doCount != 0);
 		};
-		if(__iterator < Reflect.fields(json).length) __do(); else __break_1();
+		if(__iterator < Reflect.fields(json).length) __do(); else __break_2();
 	};
-	__continue_0 = __continue_01;
-	__continue_0();
+	__continue_1 = __continue_11;
+	__continue_1();
 };
 manifest.map_manifest = function(file,cb) {
 	var asyncTest = function(__return) {
 		(function(json) {
 			json;
-			manifest.traverseJson(json,function(__parameter_8) {
-				json = __parameter_8;
+			manifest.traverseJson(json,function(__parameter_9) {
+				json = __parameter_9;
 				FileTools.setContent(file,JSON.stringify(json));
 				cb(null,file);
 				__return();
