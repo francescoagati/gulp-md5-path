@@ -52,17 +52,9 @@ class PathTools {
   }
 
   public inline static function fileName(path:Path) return path.split("/").last();
-
-
-
   public inline static function baseName(path:Path) return path.split("/").last().split(".").first();
-
-
   public inline static function basePath(path:Path) return path.split("/").slice(0,-1).join("/");
-
-
   public inline static function extension(path:Path) return path.split('/').last().split(".").last();
-
 
   public inline static function isHttp(path:Path) return path.startsWith('http');
   public inline static function isFile(path:Path) return path.startsWith('.//');
