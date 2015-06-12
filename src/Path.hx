@@ -11,11 +11,16 @@ enum TypePath {
   undefined(path:Path);
 }
 
+@:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
+class PathTools {
 
 
 
+}
 
-class PathTools{
+
+@:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
+class PathTools {
 
   public static inline function getType(path:Path):TypePath {
     return
