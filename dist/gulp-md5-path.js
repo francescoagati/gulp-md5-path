@@ -49,8 +49,11 @@ var TypePath = { __ename__ : true, __constructs__ : ["http","file","undefined"] 
 TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 TypePath.file = function(path) { var $x = ["file",1,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 TypePath.undefined = function(path) { var $x = ["undefined",2,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+var Async = function() { };
+Async.__name__ = true;
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = true;
+manifest.__interfaces__ = [Async];
 manifest.traverseJson = function(json,options,__return) {
 	var __iterator = 0;
 	var __doCount = 0;

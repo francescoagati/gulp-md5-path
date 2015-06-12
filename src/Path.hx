@@ -14,8 +14,8 @@ enum TypePath {
   undefined(path:Path);
 }
 
-@:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
-class PathsTools {
+
+class PathsTools implements Utils.Async {
 
   @:async public static inline function processPaths(paths:Paths,options:ParamsManifest) {
     return [
@@ -31,8 +31,8 @@ class PathsTools {
 }
 
 
-@:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
-class PathTools {
+
+class PathTools implements Utils.Async {
 
   @:async public static inline function processFile(path:Path,options:ParamsManifest) {
     var completePath = '${options.basePath}/${path}';

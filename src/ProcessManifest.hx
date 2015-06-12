@@ -9,31 +9,14 @@ using StringTools;
 using Path.PathsTools;
 using thx.Objects;
 using thx.Dynamics;
-using Std;
-using Reflect;
-using ProcessManifest.DynamicTools;
+using Utils.DynamicTools;
 using Lambda;
 using Utils;
 using Md5Tools.StringMd5Tools;
 
 
-
-class DynamicTools {
-  public static inline function isJsArray(o:Dynamic):Bool {
-    return untyped __js__('toString.call(o) === "[object Array]"');
-  }
-
-  public static inline function isJsObject(a:Dynamic):Bool {
-    return untyped __js__('(!!a) && (a.constructor === Object)');
-  }
-
-}
-
 @:expose  @:keep  @:native('manifest')
-@:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
-class ProcessManifest {
-
-
+class ProcessManifest implements Utils.Async {
 
   @:async static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>,options:ParamsManifest) {
     for (key in json.keys()) {
@@ -58,6 +41,7 @@ class ProcessManifest {
       cb(null,file);
     });
     asyncTest(function() {});
+
   };
 
   public static inline function task(options) {

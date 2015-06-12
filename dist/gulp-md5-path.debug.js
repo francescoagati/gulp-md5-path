@@ -193,8 +193,11 @@ var TypePath = { __ename__ : ["TypePath"], __constructs__ : ["http","file","unde
 TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 TypePath.file = function(path) { var $x = ["file",1,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 TypePath.undefined = function(path) { var $x = ["undefined",2,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+var Async = function() { };
+Async.__name__ = ["Async"];
 var PathsTools = function() { };
 PathsTools.__name__ = ["PathsTools"];
+PathsTools.__interfaces__ = [Async];
 PathsTools.processPaths = function(paths,options,__return) {
 	var __iterator = 0;
 	if(__iterator < paths.length) {
@@ -243,6 +246,7 @@ PathsTools.processPaths = function(paths,options,__return) {
 };
 var PathTools = function() { };
 PathTools.__name__ = ["PathTools"];
+PathTools.__interfaces__ = [Async];
 PathTools.processFile = function(path,options,__return) {
 	(function(completePath) {
 		completePath;
@@ -305,16 +309,9 @@ _$Path_Path_$Impl_$._new = function(s) {
 _$Path_Path_$Impl_$.fromString = function(s) {
 	return s;
 };
-var DynamicTools = function() { };
-DynamicTools.__name__ = ["DynamicTools"];
-DynamicTools.isJsArray = function(o) {
-	return toString.call(o) === "[object Array]";
-};
-DynamicTools.isJsObject = function(a) {
-	return (!!a) && (a.constructor === Object);
-};
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = ["manifest"];
+manifest.__interfaces__ = [Async];
 manifest.traverseJson = function(json,options,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
@@ -582,6 +579,14 @@ Type.enumParameters = function(e) {
 };
 Type.enumIndex = function(e) {
 	return e[1];
+};
+var DynamicTools = function() { };
+DynamicTools.__name__ = ["DynamicTools"];
+DynamicTools.isJsArray = function(o) {
+	return toString.call(o) === "[object Array]";
+};
+DynamicTools.isJsObject = function(a) {
+	return (!!a) && (a.constructor === Object);
 };
 var Utils = function() { };
 Utils.__name__ = ["Utils"];
