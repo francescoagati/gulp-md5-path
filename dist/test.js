@@ -275,8 +275,74 @@ var TypePath = { __ename__ : ["TypePath"], __constructs__ : ["http","file","unde
 TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 TypePath.file = function(path) { var $x = ["file",1,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 TypePath.undefined = function(path) { var $x = ["undefined",2,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+var PathsTools = function() { };
+PathsTools.__name__ = ["PathsTools"];
+PathsTools.processPaths = function(paths,options,__return) {
+	var __iterator = 0;
+	if(__iterator < paths.length) {
+		var __results = [];
+		var __counter = 1;
+		var __i = 0;
+		var __checkCounter = function() {
+			if(--__counter == 0) __return(__results);
+		};
+		do {
+			var path = paths[__iterator++];
+			var __index = [__i];
+			__counter++;
+			var __endSwitch_0 = [(function(__index) {
+				return function(__endSwitch_0_parameter_0) {
+					__results[__index[0]] = __endSwitch_0_parameter_0;
+					__checkCounter();
+					return;
+				};
+			})(__index)];
+			{
+				var _g = PathTools.getType(path);
+				switch(Type.enumIndex(_g)) {
+				case 0:
+					var path1 = _g[2];
+					path1;
+					__endSwitch_0[0](path1);
+					break;
+				case 1:
+					var path2 = _g[2];
+					PathTools.processFile(path2,options,(function(__endSwitch_0) {
+						return function(__parameter_5) {
+							__parameter_5;
+							__endSwitch_0[0](__parameter_5);
+						};
+					})(__endSwitch_0));
+					break;
+				default:
+					__endSwitch_0[0](null);
+				}
+			}
+			__i++;
+		} while(__iterator < paths.length);
+		__checkCounter();
+	}
+};
 var PathTools = function() { };
 PathTools.__name__ = ["PathTools"];
+PathTools.processFile = function(path,options,__return) {
+	(function(completePath) {
+		completePath;
+		(function(__afterVar_1) {
+			js_node_Fs.readFile(completePath,{ encoding : "utf8"},function(__parameter_2,__parameter_3) {
+				__afterVar_1(__parameter_2,__parameter_3);
+			});
+		})(function(err,content) {
+			err;
+			content;
+			(function(new_path) {
+				new_path;
+				haxe_Log.trace(new_path,{ fileName : "Path.hx", lineNumber : 42, className : "PathTools", methodName : "processFile"});
+				__return(new_path);
+			})(options.cdnPath + "/" + PathTools.basePath(path) + "/" + PathTools.baseName(path) + "-" + StringMd5Tools.toMd5(content) + "." + PathTools.extension(path));
+		});
+	})("" + options.basePath + "/" + path);
+};
 PathTools.getType = function(path) {
 	if(PathTools.isHttp(path)) return TypePath.http(path); else if(PathTools.isFile(path)) return TypePath.file(path); else return TypePath.undefined(path);
 };
@@ -331,113 +397,49 @@ DynamicTools.isJsObject = function(a) {
 };
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = ["manifest"];
-manifest.processFile = function(path,options,__return) {
-	(function(completePath) {
-		completePath;
-		(function(__afterVar_8) {
-			js_node_Fs.readFile(completePath,{ encoding : "utf8"},function(__parameter_9,__parameter_10) {
-				__afterVar_8(__parameter_9,__parameter_10);
-			});
-		})(function(err,content) {
-			err;
-			content;
-			(function(new_path) {
-				new_path;
-				haxe_Log.trace(new_path,{ fileName : "ProcessManifest.hx", lineNumber : 39, className : "ProcessManifest", methodName : "processFile"});
-				__return(new_path);
-			})(options.cdnPath + "/" + PathTools.basePath(path) + "/" + PathTools.baseName(path) + "-" + StringMd5Tools.toMd5(content) + "." + PathTools.extension(path));
-		});
-	})("" + options.basePath + "/" + path);
-};
-manifest.processManifest = function(paths,options,__return) {
-	var __iterator = 0;
-	if(__iterator < paths.length) {
-		var __results = [];
-		var __counter = 1;
-		var __i = 0;
-		var __checkCounter = function() {
-			if(--__counter == 0) __return(__results);
-		};
-		do {
-			var path = paths[__iterator++];
-			var __index = [__i];
-			__counter++;
-			var __endSwitch_1 = [(function(__index) {
-				return function(__endSwitch_1_parameter_0) {
-					__results[__index[0]] = __endSwitch_1_parameter_0;
-					__checkCounter();
-					return;
-				};
-			})(__index)];
-			{
-				var _g = PathTools.getType(path);
-				switch(Type.enumIndex(_g)) {
-				case 0:
-					var path1 = _g[2];
-					path1;
-					__endSwitch_1[0](path1);
-					break;
-				case 1:
-					var path2 = _g[2];
-					manifest.processFile(path2,options,(function(__endSwitch_1) {
-						return function(__parameter_12) {
-							__parameter_12;
-							__endSwitch_1[0](__parameter_12);
-						};
-					})(__endSwitch_1));
-					break;
-				default:
-					__endSwitch_1[0](null);
-				}
-			}
-			__i++;
-		} while(__iterator < paths.length);
-		__checkCounter();
-	}
-};
 manifest.traverseJson = function(json,options,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
-	var __break_2 = function() {
+	var __break_8 = function() {
 		__return(json);
 	};
-	var __continue_1;
-	var __continue_11 = null;
-	__continue_11 = function() {
+	var __continue_7;
+	var __continue_71 = null;
+	__continue_71 = function() {
 		var __do = function() {
 			var __break = function() {
-				__break_2();
+				__break_8();
 			};
 			var __continue = function() {
-				__continue_11();
+				__continue_71();
 			};
 			if(__doCount++ == 0) do (function(key) {
 				key;
 				(function(obj) {
 					obj;
-					var __endIf_0 = function() {
-						__continue_11();
+					var __endIf_1 = function() {
+						__continue_71();
 						return;
 					};
-					if(DynamicTools.isJsArray(obj)) (function(__afterVar_6) {
-						manifest.processManifest(obj,options,function(__parameter_13) {
-							__afterVar_6(__parameter_13);
+					if(DynamicTools.isJsArray(obj)) (function(__afterVar_12) {
+						PathsTools.processPaths(obj,options,function(__parameter_13) {
+							__afterVar_12(__parameter_13);
 						});
 					})(function(new_obj) {
 						new_obj;
 						json[key] = new_obj;
-						__endIf_0();
-					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,options,function(__parameter_5) {
-						__parameter_5;
-						__endIf_0();
-					}); else __endIf_0();
+						__endIf_1();
+					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,options,function(__parameter_11) {
+						__parameter_11;
+						__endIf_1();
+					}); else __endIf_1();
 				})(json[key]);
 			})(Reflect.fields(json)[__iterator++]); while(--__doCount != 0);
 		};
-		if(__iterator < Reflect.fields(json).length) __do(); else __break_2();
+		if(__iterator < Reflect.fields(json).length) __do(); else __break_8();
 	};
-	__continue_1 = __continue_11;
-	__continue_1();
+	__continue_7 = __continue_71;
+	__continue_7();
 };
 manifest.map_manifest = function(options,file,cb) {
 	var asyncTest = function(__return) {

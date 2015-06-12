@@ -1,9 +1,12 @@
 import Externs;
+import DefTypes;
+
 using FileTools;
 using StringTools;
 using Path.PathTools;
 using thx.Arrays;
-
+using Md5Tools.StringMd5Tools;
+using Path.PathTools;
 
 enum TypePath {
   http(path:Path);
@@ -12,15 +15,34 @@ enum TypePath {
 }
 
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
-class PathTools {
+class PathsTools {
 
-
+  @:async public static inline function processPaths(paths:Paths,options:ParamsManifest) {
+    return [
+      @fork(path in paths) {
+        switch (path.getType()) {
+          case http(path):path;
+          case file(path): @await path.processFile(options);
+          case _:null;
+      }
+    }];
+  }
 
 }
 
 
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
 class PathTools {
+
+  @:async public static inline function processFile(path:Path,options:ParamsManifest) {
+    var completePath = '${options.basePath}/${path}';
+
+    var err,content = @await js.node.Fs.readFile(completePath,{encoding:'utf8'});
+    var new_path =  options.cdnPath + "/" + path.basePath() + '/' + path.baseName() + "-" + content.toMd5() + "." + path.extension();
+    trace(new_path);
+    return new_path;
+  }
+
 
   public static inline function getType(path:Path):TypePath {
     return

@@ -6,7 +6,7 @@ import DefTypes;
 
 using FileTools;
 using StringTools;
-using Path.PathTools;
+using Path.PathsTools;
 using thx.Objects;
 using thx.Dynamics;
 using Std;
@@ -15,6 +15,8 @@ using ProcessManifest.DynamicTools;
 using Lambda;
 using Utils;
 using Md5Tools.StringMd5Tools;
+
+
 
 class DynamicTools {
   public static inline function isJsArray(o:Dynamic):Bool {
@@ -31,33 +33,13 @@ class DynamicTools {
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
 class ProcessManifest {
 
-  @:async static inline function processFile(path:Path,options:ParamsManifest) {
-    var completePath = '${options.basePath}/${path}';
 
-    var err,content = @await js.node.Fs.readFile(completePath,{encoding:'utf8'});
-    var new_path =  options.cdnPath + "/" + path.basePath() + '/' + path.baseName() + "-" + content.toMd5() + "." + path.extension();
-    trace(new_path);
-    return new_path;
-  }
-
-
-
-  @:async static inline function processManifest(paths:Paths,options:ParamsManifest) {
-    return [
-      @fork(path in paths) {
-        switch (path.getType()) {
-          case http(path):path;
-          case file(path): @await processFile(path,options);
-          case _:null;
-      }
-    }];
-  }
 
   @:async static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>,options:ParamsManifest) {
     for (key in json.keys()) {
       var obj = json.get(key);
       if (obj.isJsArray()) {
-        var new_obj = @await processManifest(obj,options);
+        var new_obj = @await (obj:Paths).processPaths(options);
         json.set(key,new_obj);
       }
       else if (obj.isJsObject()) @await traverseJson(obj,options);

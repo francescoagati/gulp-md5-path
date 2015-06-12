@@ -4,6 +4,7 @@ import Externs;
 using FileTools;
 using thx.Arrays;
 using thx.Functions;
+using Md5Tools.FileMd5Tools;
 
 @:keep @:expose @:native('md5') class Md5 {
   static inline function map_file(file:AFile,cb) {
