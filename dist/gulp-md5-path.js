@@ -38,8 +38,7 @@ md5.map_file = function(file,cb) {
 	var end = splits.slice(splits.length - 1)[0];
 	var basename = end.split(".");
 	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
-	var p = Pretty();
-	console.log(p);
+	Pretty();
 	cb(null,file);
 };
 md5.task = function(options) {
@@ -179,7 +178,8 @@ manifest.traverseJson = function(json,options,__return) {
 	__continue_6();
 };
 manifest.map_manifest = function(options,file,cb) {
-	var asyncTest = function(__return) {
+	var tmp;
+	var __fn_tmp_21289031_2149666175_dc15a25aca6c3d1a57c23a5f560f822a = function(__return) {
 		var json = JSON.parse(file.contents.toString());
 		manifest.traverseJson(json,options,function(__parameter_14) {
 			json = __parameter_14;
@@ -189,7 +189,8 @@ manifest.map_manifest = function(options,file,cb) {
 			__return();
 		});
 	};
-	asyncTest(function() {
+	tmp = __fn_tmp_21289031_2149666175_dc15a25aca6c3d1a57c23a5f560f822a;
+	tmp(function() {
 	});
 };
 manifest.task = function(options) {

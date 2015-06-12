@@ -164,7 +164,6 @@ md5.__name__ = ["md5"];
 md5.map_file = function(file,cb) {
 	FileMd5Tools.toMd5(file);
 	var p = Pretty();
-	console.log(p);
 	cb(null,file);
 };
 md5.task = function(options) {
@@ -357,18 +356,22 @@ manifest.traverseJson = function(json,options,__return) {
 	__continue_6();
 };
 manifest.map_manifest = function(options,file,cb) {
-	var asyncTest = function(__return) {
-		(function(json) {
-			json;
-			manifest.traverseJson(json,options,function(__parameter_14) {
-				json = __parameter_14;
-				FileTools.setContent(file,JSON.stringify(json));
-				cb(null,file);
-				__return();
-			});
-		})(FileTools.toJson(file));
-	};
-	asyncTest(function() {
+	((function($this) {
+		var $r;
+		var __fn_tmp_47089388_2977103218_ae0c7408d8a6c47209890d48d291917f = function(__return) {
+			(function(json) {
+				json;
+				manifest.traverseJson(json,options,function(__parameter_14) {
+					json = __parameter_14;
+					FileTools.setContent(file,JSON.stringify(json));
+					cb(null,file);
+					__return();
+				});
+			})(FileTools.toJson(file));
+		};
+		$r = __fn_tmp_47089388_2977103218_ae0c7408d8a6c47209890d48d291917f;
+		return $r;
+	}(this)))(function() {
 	});
 };
 manifest.task = function(options) {
@@ -588,6 +591,8 @@ DynamicTools.isJsArray = function(o) {
 DynamicTools.isJsObject = function(a) {
 	return (!!a) && (a.constructor === Object);
 };
+var Cont = function() { };
+Cont.__name__ = ["Cont"];
 var Utils = function() { };
 Utils.__name__ = ["Utils"];
 Utils.pretty = function(obj) {
