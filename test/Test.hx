@@ -11,7 +11,7 @@ using FileTools;
 using thx.Arrays;
 using thx.Functions;
 using buddy.Should;
-using Manifest.PathTools;
+using Path.PathTools;
 using VinylTools;
 using Utils;
 using Md5Tools.FileMd5Tools;

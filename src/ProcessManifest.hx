@@ -6,7 +6,7 @@ import DefTypes;
 
 using FileTools;
 using StringTools;
-using Manifest.PathTools;
+using Path.PathTools;
 using thx.Objects;
 using thx.Dynamics;
 using Std;

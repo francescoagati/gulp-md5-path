@@ -3,7 +3,7 @@ import Path;
 
 using FileTools;
 using StringTools;
-using PathTools;
+using Path.PathTools;
 using thx.Arrays;
 
 

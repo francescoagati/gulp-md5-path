@@ -242,18 +242,6 @@ _$List_ListIterator.prototype = {
 	}
 	,__class__: _$List_ListIterator
 };
-var TypePath = { __ename__ : ["TypePath"], __constructs__ : ["http","file","undefined"] };
-TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
-TypePath.file = function(path) { var $x = ["file",1,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
-TypePath.undefined = function(path) { var $x = ["undefined",2,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
-var _$Manifest_Path_$Impl_$ = {};
-_$Manifest_Path_$Impl_$.__name__ = ["_Manifest","Path_Impl_"];
-_$Manifest_Path_$Impl_$._new = function(s) {
-	return s;
-};
-_$Manifest_Path_$Impl_$.fromString = function(s) {
-	return s;
-};
 var _$Manifest_AManifest_$Impl_$ = {};
 _$Manifest_AManifest_$Impl_$.__name__ = ["_Manifest","AManifest_Impl_"];
 _$Manifest_AManifest_$Impl_$._new = function(m) {
@@ -263,6 +251,30 @@ _$Manifest_AManifest_$Impl_$.fromFile = function(file) {
 	var m = JSON.parse(FileTools.toString(file));
 	return m;
 };
+Math.__name__ = ["Math"];
+var StringMd5Tools = function() { };
+StringMd5Tools.__name__ = ["StringMd5Tools"];
+StringMd5Tools.toMd5 = function(s) {
+	var md5 = js_node_Crypto.createHash("md5");
+	md5.update(s);
+	return md5.digest("hex");
+};
+var FileMd5Tools = function() { };
+FileMd5Tools.__name__ = ["FileMd5Tools"];
+FileMd5Tools.toMd5 = function(file) {
+	var md5_suffix = StringMd5Tools.toMd5(FileTools.toString(file));
+	var splits = file.path.split("/");
+	var end = splits.slice(splits.length - 1)[0];
+	var basename = end.split(".");
+	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
+	return file;
+};
+var Md5Tools = function() { };
+Md5Tools.__name__ = ["Md5Tools"];
+var TypePath = { __ename__ : ["TypePath"], __constructs__ : ["http","file","undefined"] };
+TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+TypePath.file = function(path) { var $x = ["file",1,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+TypePath.undefined = function(path) { var $x = ["undefined",2,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
 var PathTools = function() { };
 PathTools.__name__ = ["PathTools"];
 PathTools.getType = function(path) {
@@ -301,26 +313,14 @@ PathTools.processPath = function(path) {
 		}
 	}
 };
-Math.__name__ = ["Math"];
-var StringMd5Tools = function() { };
-StringMd5Tools.__name__ = ["StringMd5Tools"];
-StringMd5Tools.toMd5 = function(s) {
-	var md5 = js_node_Crypto.createHash("md5");
-	md5.update(s);
-	return md5.digest("hex");
+var _$Path_Path_$Impl_$ = {};
+_$Path_Path_$Impl_$.__name__ = ["_Path","Path_Impl_"];
+_$Path_Path_$Impl_$._new = function(s) {
+	return s;
 };
-var FileMd5Tools = function() { };
-FileMd5Tools.__name__ = ["FileMd5Tools"];
-FileMd5Tools.toMd5 = function(file) {
-	var md5_suffix = StringMd5Tools.toMd5(FileTools.toString(file));
-	var splits = file.path.split("/");
-	var end = splits.slice(splits.length - 1)[0];
-	var basename = end.split(".");
-	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
-	return file;
+_$Path_Path_$Impl_$.fromString = function(s) {
+	return s;
 };
-var Md5Tools = function() { };
-Md5Tools.__name__ = ["Md5Tools"];
 var DynamicTools = function() { };
 DynamicTools.__name__ = ["DynamicTools"];
 DynamicTools.isJsArray = function(o) {
@@ -343,7 +343,7 @@ manifest.processFile = function(path,options,__return) {
 			content;
 			(function(new_path) {
 				new_path;
-				haxe_Log.trace(new_path,{ fileName : "ProcessManifest.hx", lineNumber : 38, className : "ProcessManifest", methodName : "processFile"});
+				haxe_Log.trace(new_path,{ fileName : "ProcessManifest.hx", lineNumber : 39, className : "ProcessManifest", methodName : "processFile"});
 				__return(new_path);
 			})(options.cdnPath + "/" + PathTools.basePath(path) + "/" + PathTools.baseName(path) + "-" + StringMd5Tools.toMd5(content) + "." + PathTools.extension(path));
 		});
