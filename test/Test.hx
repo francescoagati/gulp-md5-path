@@ -14,6 +14,9 @@ using buddy.Should;
 using Manifest.PathTools;
 using VinylTools;
 using Utils;
+using Md5Tools.FileMd5Tools;
+using StringTools;
+using thx.Strings;
 
 // Add test suites within the brackets
 class Test implements Buddy<[Tests]> {
@@ -48,7 +51,11 @@ class Tests extends BuddySuite {
           var path = '${Node.__dirname}/../test/files';
 
           var file = ('./test/manifest.json':Path).toVynil();
-          ProcessManifest.map_manifest({basePath:path},file,function(_,file) {
+          var params = {
+            basePath:path,
+            cdnPath:'http://cdn5.xxxxx.com/'
+          }
+          ProcessManifest.map_manifest(params,file,function(_,file) {
             fileResult = file;
             done();
           });
@@ -59,7 +66,7 @@ class Tests extends BuddySuite {
 
         it("manifest changed",{
           trace(fileResult.pretty());
-          (file).should.not.be(fileResult);
+          fileResult.toString().contains('cdn5').should.be(true);
         });
 
 

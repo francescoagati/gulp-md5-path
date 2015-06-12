@@ -1,7 +1,7 @@
 import Externs;
 import Manifest;
 import com.dongxiguo.continuation.Continuation;
-
+import DefTypes;
 
 using FileTools;
 using StringTools;
@@ -13,6 +13,7 @@ using Reflect;
 using ProcessManifest.DynamicTools;
 using Lambda;
 using Utils;
+using Md5Tools.StringMd5Tools;
 
 class DynamicTools {
   public static inline function isJsArray(o:Dynamic):Bool {
@@ -29,16 +30,18 @@ class DynamicTools {
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
 class ProcessManifest {
 
-  @:async static inline function processFile(path:Path,options:{basePath:String}) {
+  @:async static inline function processFile(path:Path,options:ParamsManifest) {
     var completePath = '${options.basePath}/${path}';
 
     var err,content = @await js.node.Fs.readFile(completePath,{encoding:'utf8'});
-    return path;
+    var new_path =  options.cdnPath + "/" + path.basePath() + '/' + path.baseName() + "-" + content.toMd5() + "." + path.extension();
+    trace(new_path);
+    return new_path;
   }
 
 
 
-  @:async static inline function processManifest(paths:Paths,options:{basePath:String}) {
+  @:async static inline function processManifest(paths:Paths,options:ParamsManifest) {
     return [
       @fork(path in paths) {
         switch (path.getType()) {
@@ -49,7 +52,7 @@ class ProcessManifest {
     }];
   }
 
-  @:async static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>,options:{basePath:String}) {
+  @:async static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>,options:ParamsManifest) {
     for (key in json.keys()) {
       var obj = json.get(key);
       if (obj.isJsArray()) {
@@ -62,7 +65,7 @@ class ProcessManifest {
 
   }
 
-  public static inline function map_manifest(options:{basePath:String},file:File,cb) {
+  public static inline function map_manifest(options:ParamsManifest,file:File,cb) {
 
 
     Continuation.cpsFunction(function asyncTest():Void {

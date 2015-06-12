@@ -7,6 +7,8 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var DefTypes = function() { };
+DefTypes.__name__ = ["DefTypes"];
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -89,16 +91,6 @@ FileTools.toString = function(file) {
 };
 FileTools.toJson = function(file) {
 	return JSON.parse(FileTools.toString(file));
-};
-FileTools.toMd5 = function(file) {
-	var md5 = js_node_Crypto.createHash("md5");
-	md5.update(FileTools.toString(file));
-	var md5_suffix = md5.digest("hex");
-	var splits = file.path.split("/");
-	var end = splits.slice(splits.length - 1)[0];
-	var basename = end.split(".");
-	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
-	return file;
 };
 FileTools.setContent = function(file,content) {
 	file.contents = new js_node_buffer_Buffer(content);
@@ -310,6 +302,25 @@ PathTools.processPath = function(path) {
 	}
 };
 Math.__name__ = ["Math"];
+var StringMd5Tools = function() { };
+StringMd5Tools.__name__ = ["StringMd5Tools"];
+StringMd5Tools.toMd5 = function(s) {
+	var md5 = js_node_Crypto.createHash("md5");
+	md5.update(s);
+	return md5.digest("hex");
+};
+var FileMd5Tools = function() { };
+FileMd5Tools.__name__ = ["FileMd5Tools"];
+FileMd5Tools.toMd5 = function(file) {
+	var md5_suffix = StringMd5Tools.toMd5(FileTools.toString(file));
+	var splits = file.path.split("/");
+	var end = splits.slice(splits.length - 1)[0];
+	var basename = end.split(".");
+	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
+	return file;
+};
+var Md5Tools = function() { };
+Md5Tools.__name__ = ["Md5Tools"];
 var DynamicTools = function() { };
 DynamicTools.__name__ = ["DynamicTools"];
 DynamicTools.isJsArray = function(o) {
@@ -330,8 +341,11 @@ manifest.processFile = function(path,options,__return) {
 		})(function(err,content) {
 			err;
 			content;
-			haxe_Log.trace(content,{ fileName : "ProcessManifest.hx", lineNumber : 36, className : "ProcessManifest", methodName : "processFile"});
-			__return(path);
+			(function(new_path) {
+				new_path;
+				haxe_Log.trace(new_path,{ fileName : "ProcessManifest.hx", lineNumber : 38, className : "ProcessManifest", methodName : "processFile"});
+				__return(new_path);
+			})(options.cdnPath + "/" + PathTools.basePath(path) + "/" + PathTools.baseName(path) + "-" + StringMd5Tools.toMd5(content) + "." + PathTools.extension(path));
 		});
 	})("" + options.basePath + "/" + path);
 };
@@ -366,9 +380,9 @@ manifest.processManifest = function(paths,options,__return) {
 				case 1:
 					var path2 = _g[2];
 					manifest.processFile(path2,options,(function(__endSwitch_1) {
-						return function(__parameter_11) {
-							__parameter_11;
-							__endSwitch_1[0](__parameter_11);
+						return function(__parameter_12) {
+							__parameter_12;
+							__endSwitch_1[0](__parameter_12);
 						};
 					})(__endSwitch_1));
 					break;
@@ -406,8 +420,8 @@ manifest.traverseJson = function(json,options,__return) {
 						return;
 					};
 					if(DynamicTools.isJsArray(obj)) (function(__afterVar_6) {
-						manifest.processManifest(obj,options,function(__parameter_12) {
-							__afterVar_6(__parameter_12);
+						manifest.processManifest(obj,options,function(__parameter_13) {
+							__afterVar_6(__parameter_13);
 						});
 					})(function(new_obj) {
 						new_obj;
@@ -429,8 +443,8 @@ manifest.map_manifest = function(options,file,cb) {
 	var asyncTest = function(__return) {
 		(function(json) {
 			json;
-			manifest.traverseJson(json,options,function(__parameter_13) {
-				json = __parameter_13;
+			manifest.traverseJson(json,options,function(__parameter_14) {
+				json = __parameter_14;
 				FileTools.setContent(file,JSON.stringify(json));
 				cb(null,file);
 				__return();
@@ -702,7 +716,7 @@ var Tests = function() {
 			file = v;
 		}
 		_g.syncIt("identity",function(__asyncDone,__status) {
-			buddy_ShouldString.should(FileTools.toMd5(file).basename,__status).be("file-3e25960a79dbc69b674cd4ec67a72c62.coffee",{ fileName : "Test.hx", lineNumber : 37, className : "Tests", methodName : "new"});
+			buddy_ShouldString.should(FileMd5Tools.toMd5(file).basename,__status).be("file-3e25960a79dbc69b674cd4ec67a72c62.coffee",{ fileName : "Test.hx", lineNumber : 40, className : "Tests", methodName : "new"});
 		});
 	});
 	this.describe("manifest",function() {
@@ -710,14 +724,15 @@ var Tests = function() {
 		_g.before(function(done,__status1) {
 			var path = "" + __dirname + "/../test/files";
 			var file1 = VinylTools.toVynil("./test/manifest.json");
-			manifest.map_manifest({ basePath : path},file1,function(_,file2) {
+			var params = { basePath : path, cdnPath : "http://cdn5.xxxxx.com/"};
+			manifest.map_manifest(params,file1,function(_,file2) {
 				fileResult = file2;
 				done();
 			});
 		});
 		_g.syncIt("manifest changed",function(__asyncDone1,__status2) {
-			haxe_Log.trace(Utils.pretty(fileResult),{ fileName : "Test.hx", lineNumber : 61, className : "Tests", methodName : "new"});
-			buddy_ShouldDynamic.should(TypePath.file,__status2).get_not().be(fileResult,{ fileName : "Test.hx", lineNumber : 62, className : "Tests", methodName : "new"});
+			haxe_Log.trace(Utils.pretty(fileResult),{ fileName : "Test.hx", lineNumber : 68, className : "Tests", methodName : "new"});
+			buddy_ShouldDynamic.should(thx_Strings.contains(FileTools.toString(fileResult),"cdn5"),__status2).be(true,{ fileName : "Test.hx", lineNumber : 69, className : "Tests", methodName : "new"});
 		});
 	});
 };
