@@ -1,9 +1,9 @@
 import Externs;
 import Manifest;
 
-using Manifest.PathTools;
+using Path.PathTools;
 
-class VinylTools { 
+class VinylTools {
 
   public static inline function  toVynil(path:Path):AFile {
     return new Vinyl({
