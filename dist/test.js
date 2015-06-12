@@ -439,18 +439,22 @@ manifest.traverseJson = function(json,options,__return) {
 	__continue_7();
 };
 manifest.map_manifest = function(options,file,cb) {
-	var asyncTest = function(__return) {
-		(function(json) {
-			json;
-			manifest.traverseJson(json,options,function(__parameter_14) {
-				json = __parameter_14;
-				FileTools.setContent(file,JSON.stringify(json));
-				cb(null,file);
-				__return();
-			});
-		})(FileTools.toJson(file));
-	};
-	asyncTest(function() {
+	((function($this) {
+		var $r;
+		var __fn_tmp_84010047_2109831125_e0f8ac98d20c513dc916cef20f9e117a = function(__return) {
+			(function(json) {
+				json;
+				manifest.traverseJson(json,options,function(__parameter_14) {
+					json = __parameter_14;
+					FileTools.setContent(file,JSON.stringify(json));
+					cb(null,file);
+					__return();
+				});
+			})(FileTools.toJson(file));
+		};
+		$r = __fn_tmp_84010047_2109831125_e0f8ac98d20c513dc916cef20f9e117a;
+		return $r;
+	}(this)))(function() {
 	});
 };
 manifest.task = function(options) {
@@ -836,6 +840,8 @@ DynamicTools.isJsArray = function(o) {
 DynamicTools.isJsObject = function(a) {
 	return (!!a) && (a.constructor === Object);
 };
+var Cont = function() { };
+Cont.__name__ = ["Cont"];
 var Utils = function() { };
 Utils.__name__ = ["Utils"];
 Utils.pretty = function(obj) {

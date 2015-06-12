@@ -3,6 +3,8 @@ import Manifest;
 import Path;
 import com.dongxiguo.continuation.Continuation;
 import DefTypes;
+import Utils.Cont.cont_exec;
+
 
 using FileTools;
 using StringTools;
@@ -32,15 +34,13 @@ class ProcessManifest implements Utils.Async {
   }
 
   public static inline function map_manifest(options:ParamsManifest,file:File,cb) {
-
-
-    Continuation.cpsFunction(function asyncTest():Void {
+    cont_exec({
       var json = file.toJson();
       json = @await traverseJson(json,options);
       file.setContent(haxe.Json.stringify(json));
       cb(null,file);
+      null;
     });
-    asyncTest(function() {});
 
   };
 
