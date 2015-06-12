@@ -18,12 +18,12 @@ using Md5Tools.StringMd5Tools;
 @:expose  @:keep  @:native('manifest')
 class ProcessManifest implements Utils.Async {
 
-  @:async static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>,options:ParamsManifest) {
+  @:async static function traverseJson(json:haxe.DynamicAccess<Dynamic>,options:ParamsManifest) {
     for (key in json.keys()) {
-      var obj = json.get(key);
+      var obj = json[key];
       if (obj.isJsArray()) {
         var new_obj = @await (obj:Paths).processPaths(options);
-        json.set(key,new_obj);
+        json[key] = new_obj;
       }
       else if (obj.isJsObject()) @await traverseJson(obj,options);
     }
