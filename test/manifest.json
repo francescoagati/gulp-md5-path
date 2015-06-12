@@ -1,0 +1,33 @@
+{
+  "a":1,
+  "b":"",
+  "c":[
+    "wejfwefweofwejfiwefwieofwfiewi",
+    ".//folderA/ember.min.js",
+    ".//folderA/jQuery.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/AdapterRegistry.js.uncompressed.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/DeferredList.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/_firebug/firebug.css",
+    ".//folderA/jQuery.min.js",
+    ".//folderA/jQuery.min.js",
+    ".//folderB/messenger.js"
+  ],
+  "d":{
+    "e":1,
+    "f":"qwd",
+    "g":{
+      "h":[
+        "wejfwefweofwejfiwefwieofwfiewi",
+        ".//folderA/ember.min.js",
+        ".//folderA/jQuery.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/AdapterRegistry.js.uncompressed.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/DeferredList.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/_firebug/firebug.css",
+        ".//folderA/jQuery.min.js",
+        ".//folderA/jQuery.min.js",
+        ".//folderB/messenger.js"
+      ]
+    }
+  }
+
+}
