@@ -441,7 +441,7 @@ manifest.traverseJson = function(json,options,__return) {
 manifest.map_manifest = function(options,file,cb) {
 	((function($this) {
 		var $r;
-		var __fn_tmp_84010047_2109831125_e0f8ac98d20c513dc916cef20f9e117a = function(__return) {
+		var __fn_tmp_83777983_8229009211_c8ebdcbc2a8e23cf2409a9ad8a78b7a4 = function(__return) {
 			(function(json) {
 				json;
 				manifest.traverseJson(json,options,function(__parameter_14) {
@@ -452,7 +452,7 @@ manifest.map_manifest = function(options,file,cb) {
 				});
 			})(FileTools.toJson(file));
 		};
-		$r = __fn_tmp_84010047_2109831125_e0f8ac98d20c513dc916cef20f9e117a;
+		$r = __fn_tmp_83777983_8229009211_c8ebdcbc2a8e23cf2409a9ad8a78b7a4;
 		return $r;
 	}(this)))(function() {
 	});
@@ -840,8 +840,6 @@ DynamicTools.isJsArray = function(o) {
 DynamicTools.isJsObject = function(a) {
 	return (!!a) && (a.constructor === Object);
 };
-var Cont = function() { };
-Cont.__name__ = ["Cont"];
 var Utils = function() { };
 Utils.__name__ = ["Utils"];
 Utils.pretty = function(obj) {
@@ -857,6 +855,8 @@ VinylTools.toVynil = function(path) {
 		return v;
 	}
 };
+var async_$tools_Cps = function() { };
+async_$tools_Cps.__name__ = ["async_tools","Cps"];
 var buddy_TestStatus = { __ename__ : ["buddy","TestStatus"], __constructs__ : ["Unknown","Passed","Pending","Failed"] };
 buddy_TestStatus.Unknown = ["Unknown",0];
 buddy_TestStatus.Unknown.toString = $estr;

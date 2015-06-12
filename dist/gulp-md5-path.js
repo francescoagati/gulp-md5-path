@@ -179,7 +179,7 @@ manifest.traverseJson = function(json,options,__return) {
 };
 manifest.map_manifest = function(options,file,cb) {
 	var tmp;
-	var __fn_tmp_21289031_2149666175_dc15a25aca6c3d1a57c23a5f560f822a = function(__return) {
+	var __fn_tmp_68389495_4638159126_06740c18272422dd65e1da2a18473d2a = function(__return) {
 		var json = JSON.parse(file.contents.toString());
 		manifest.traverseJson(json,options,function(__parameter_14) {
 			json = __parameter_14;
@@ -189,7 +189,7 @@ manifest.map_manifest = function(options,file,cb) {
 			__return();
 		});
 	};
-	tmp = __fn_tmp_21289031_2149666175_dc15a25aca6c3d1a57c23a5f560f822a;
+	tmp = __fn_tmp_68389495_4638159126_06740c18272422dd65e1da2a18473d2a;
 	tmp(function() {
 	});
 };
