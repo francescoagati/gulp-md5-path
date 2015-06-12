@@ -4,6 +4,6 @@
 -debug
 -main Test
 --no-inline
--lib hxnodejs slambda thx.core jsrequire sure nanotest
+-lib hxnodejs slambda thx.core jsrequire sure  tink_lang buddy
 --macro jsrequire.JSRequire.npmInstall(true)
 -cmd node dist/test.js

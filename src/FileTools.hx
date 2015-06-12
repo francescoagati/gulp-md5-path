@@ -26,6 +26,9 @@ class FileTools {
     return file;
   }
 
+  public static inline function setContent(file:File,content:String) {
+    file.contents = new Buffer(content);
+  }
 
 
 }

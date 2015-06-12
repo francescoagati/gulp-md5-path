@@ -1,4 +1,5 @@
 (function (console, $hx_exports) { "use strict";
+$hx_exports.promhx = $hx_exports.promhx || {};
 var $estr = function() { return js_Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
@@ -99,6 +100,9 @@ FileTools.toMd5 = function(file) {
 	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
 	return file;
 };
+FileTools.setContent = function(file,content) {
+	file.contents = new js_node_buffer_Buffer(content);
+};
 var HxOverrides = function() { };
 HxOverrides.__name__ = ["HxOverrides"];
 HxOverrides.cca = function(s,index) {
@@ -149,6 +153,102 @@ Lambda.has = function(it,elt) {
 		if(x == elt) return true;
 	}
 	return false;
+};
+Lambda.exists = function(it,f) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(f(x)) return true;
+	}
+	return false;
+};
+Lambda.iter = function(it,f) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		f(x);
+	}
+};
+Lambda.concat = function(a,b) {
+	var l = new List();
+	var $it0 = $iterator(a)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		l.add(x);
+	}
+	var $it1 = $iterator(b)();
+	while( $it1.hasNext() ) {
+		var x1 = $it1.next();
+		l.add(x1);
+	}
+	return l;
+};
+var List = function() {
+	this.length = 0;
+};
+List.__name__ = ["List"];
+List.prototype = {
+	h: null
+	,q: null
+	,length: null
+	,add: function(item) {
+		var x = [item];
+		if(this.h == null) this.h = x; else this.q[1] = x;
+		this.q = x;
+		this.length++;
+	}
+	,push: function(item) {
+		var x = [item,this.h];
+		this.h = x;
+		if(this.q == null) this.q = x;
+		this.length++;
+	}
+	,first: function() {
+		if(this.h == null) return null; else return this.h[0];
+	}
+	,pop: function() {
+		if(this.h == null) return null;
+		var x = this.h[0];
+		this.h = this.h[1];
+		if(this.h == null) this.q = null;
+		this.length--;
+		return x;
+	}
+	,isEmpty: function() {
+		return this.h == null;
+	}
+	,iterator: function() {
+		return new _$List_ListIterator(this.h);
+	}
+	,filter: function(f) {
+		var l2 = new List();
+		var l = this.h;
+		while(l != null) {
+			var v = l[0];
+			l = l[1];
+			if(f(v)) l2.add(v);
+		}
+		return l2;
+	}
+	,__class__: List
+};
+var _$List_ListIterator = function(head) {
+	this.head = head;
+	this.val = null;
+};
+_$List_ListIterator.__name__ = ["_List","ListIterator"];
+_$List_ListIterator.prototype = {
+	head: null
+	,val: null
+	,hasNext: function() {
+		return this.head != null;
+	}
+	,next: function() {
+		this.val = this.head[0];
+		this.head = this.head[1];
+		return this.val;
+	}
+	,__class__: _$List_ListIterator
 };
 var TypePath = { __ename__ : ["TypePath"], __constructs__ : ["http","file","undefined"] };
 TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
@@ -209,165 +309,7 @@ PathTools.processPath = function(path) {
 		}
 	}
 };
-var nanotest_NanoTestCase = function(posInfos) {
-	this.posInfos = posInfos;
-};
-nanotest_NanoTestCase.__name__ = ["nanotest","NanoTestCase"];
-nanotest_NanoTestCase.ASSERT_THROWS_ILLEGAL_EXCEPTION = function(actual) {
-	return "catched illeagal exception " + nanotest_NanoTestCase.format(actual);
-};
-nanotest_NanoTestCase.ASSERT_EQUALS_ERROR = function(expected,actual) {
-	return "expected " + nanotest_NanoTestCase.format(expected) + " but was " + nanotest_NanoTestCase.format(actual);
-};
-nanotest_NanoTestCase.ASSERT_NOT_EQUALS_ERROR = function(expected,actual) {
-	return "expected not " + nanotest_NanoTestCase.format(expected) + " but was " + nanotest_NanoTestCase.format(actual);
-};
-nanotest_NanoTestCase.format = function(d) {
-	if(typeof(d) == "string") return "\"" + Std.string(d) + "\""; else return "" + Std.string(d);
-};
-nanotest_NanoTestCase.prototype = {
-	currentResult: null
-	,posInfos: null
-	,globalTearDown: function() {
-	}
-	,globalSetup: function() {
-	}
-	,tearDown: function() {
-	}
-	,setup: function() {
-	}
-	,run: function(print) {
-		var _g = this;
-		var results = [];
-		var cl = Type.getClass(this);
-		var fields = Type.getInstanceFields(cl);
-		var closeResult = function() {
-			if(_g.currentResult.error) print("E"); else if(_g.currentResult.failed) print("F"); else print(".");
-			results.push(_g.currentResult);
-			_g.currentResult = null;
-		};
-		print("Class: " + Type.getClassName(cl) + " ");
-		this.globalSetup();
-		if(this.currentResult != null) closeResult();
-		var _g1 = 0;
-		while(_g1 < fields.length) {
-			var fname = fields[_g1];
-			++_g1;
-			var field = Reflect.field(this,fname);
-			if(StringTools.startsWith(fname,"test") && Reflect.isFunction(field)) {
-				this.currentResult = { className : Type.getClassName(cl), method : fname, async : false, testCase : this, error : false, failed : false, status : []};
-				this.setup();
-				try {
-					Reflect.callMethod(this,field,[]);
-				} catch( e ) {
-					haxe_CallStack.lastException = e;
-					if (e instanceof js__$Boot_HaxeError) e = e.val;
-					this.error(e);
-				}
-				this.tearDown();
-				closeResult();
-			}
-		}
-		this.globalTearDown();
-		print("\n");
-		return results;
-	}
-	,assertTrue: function(b,p) {
-		if(b == false) return this.fail("expected true but was false",p); else return this.success(p);
-	}
-	,assertFalse: function(b,p) {
-		if(b == true) return this.fail("expected false but was true",p); else return this.success(p);
-	}
-	,assertEquals: function(expected,actual,p) {
-		if(Reflect.isEnumValue(expected)) {
-			if(!Type.enumEq(actual,expected)) return this.fail(nanotest_NanoTestCase.ASSERT_EQUALS_ERROR(expected,actual),p); else return this.success(p);
-		} else if(actual != expected) return this.fail(nanotest_NanoTestCase.ASSERT_EQUALS_ERROR(expected,actual),p); else return this.success(p);
-	}
-	,assertNotEquals: function(notExpected,actual,p) {
-		if(Reflect.isEnumValue(notExpected)) {
-			if(Type.enumEq(actual,notExpected)) return this.fail(nanotest_NanoTestCase.ASSERT_NOT_EQUALS_ERROR(notExpected,actual),p); else return this.success(p);
-		} else if(actual == notExpected) return this.fail(nanotest_NanoTestCase.ASSERT_NOT_EQUALS_ERROR(notExpected,actual),p); else return this.success(p);
-	}
-	,assertThrows: function(func,isSuccess,p) {
-		try {
-			func();
-		} catch( d ) {
-			haxe_CallStack.lastException = d;
-			if (d instanceof js__$Boot_HaxeError) d = d.val;
-			if(isSuccess == null || isSuccess(d)) return this.success(p); else {
-				var f = this.fail(nanotest_NanoTestCase.ASSERT_THROWS_ILLEGAL_EXCEPTION(d),p);
-				this.error(d);
-				return f;
-			}
-		}
-		return this.fail("expected to throw exception but didn't",p);
-	}
-	,fail: function(message,p) {
-		if(this.currentResult == null) this._openPreprocessResult();
-		this.currentResult.failed = true;
-		var i = this.currentResult.status.length;
-		var status = nanotest_NanoTestStatus.FAIL(message,p);
-		this.currentResult.status.push(status);
-		return new nanotest_NanoTestAssertResult(this.currentResult,i);
-	}
-	,success: function(p) {
-		if(this.currentResult == null) this._openPreprocessResult();
-		var i = this.currentResult.status.length;
-		var status = nanotest_NanoTestStatus.SUCCESS(p);
-		this.currentResult.status.push(status);
-		return new nanotest_NanoTestAssertResult(this.currentResult,i);
-	}
-	,error: function(e) {
-		if(this.currentResult == null) this._openPreprocessResult();
-		this.currentResult.failed = true;
-		this.currentResult.error = true;
-		var message;
-		if(e.message != null) message = Std.string(e) + " [" + Std.string(e.message) + "]"; else message = Std.string(e);
-		var i = this.currentResult.status.length;
-		var status = nanotest_NanoTestStatus.ERROR(message,haxe_CallStack.exceptionStack());
-		this.currentResult.status.push(status);
-		return new nanotest_NanoTestAssertResult(this.currentResult,i);
-	}
-	,_openPreprocessResult: function() {
-		this.currentResult = { className : Type.getClassName(Type.getClass(this)), method : null, async : true, testCase : this, error : false, failed : false, status : []};
-	}
-	,__class__: nanotest_NanoTestCase
-};
-var ManifestTest = function(posInfos) {
-	nanotest_NanoTestCase.call(this,posInfos);
-};
-ManifestTest.__name__ = ["ManifestTest"];
-ManifestTest.__super__ = nanotest_NanoTestCase;
-ManifestTest.prototype = $extend(nanotest_NanoTestCase.prototype,{
-	testBasic: function() {
-		var file = VinylTools.toVynil("./test/manifest.json");
-		ProcessManifest.map_manifest(file,function(x,file1) {
-		});
-		var actual = 1;
-		var expected = 1;
-		if(actual != expected) throw new js__$Boot_HaxeError("FAIL: values are not equal (expected: " + expected + ", actual: " + actual + ")");
-	}
-	,__class__: ManifestTest
-});
 Math.__name__ = ["Math"];
-var Md5Test = function(posInfos) {
-	nanotest_NanoTestCase.call(this,posInfos);
-};
-Md5Test.__name__ = ["Md5Test"];
-Md5Test.__super__ = nanotest_NanoTestCase;
-Md5Test.prototype = $extend(nanotest_NanoTestCase.prototype,{
-	testBasic: function() {
-		var file;
-		{
-			var v = new Vinyl({ cwd : "/", base : "/test/", path : "/test/file.coffee", contents : new js_node_buffer_Buffer("Hello world")});
-			file = v;
-		}
-		var actual = FileTools.toMd5(file).basename;
-		var expected = "file-3e25960a79dbc69b674cd4ec67a72c62.coffee";
-		if(actual != expected) throw new js__$Boot_HaxeError("FAIL: values are not equal (expected: " + expected + ", actual: " + actual + ")");
-	}
-	,__class__: Md5Test
-});
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = ["manifest"];
 manifest.isJsArray = function(o) {
@@ -379,14 +321,28 @@ manifest.isJsObject = function(a) {
 var ProcessManifest = function() { };
 ProcessManifest.__name__ = ["ProcessManifest"];
 ProcessManifest.processManifest = function(paths) {
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < paths.length) {
-		var path = paths[_g1];
-		++_g1;
-		_g.push(PathTools.getType(path));
+	var __tmp = [];
+	var _g = 0;
+	while(_g < paths.length) {
+		var path = paths[_g];
+		++_g;
+		{
+			var _g1 = PathTools.getType(path);
+			switch(Type.enumIndex(_g1)) {
+			case 0:
+				var path1 = _g1[2];
+				__tmp.push(path1);
+				break;
+			case 1:
+				var path2 = _g1[2];
+				__tmp.push(path2);
+				break;
+			default:
+				__tmp.push(null);
+			}
+		}
 	}
-	return _g;
+	return __tmp;
 };
 ProcessManifest.traverseJson = function(json) {
 	var _g = 0;
@@ -400,12 +356,12 @@ ProcessManifest.traverseJson = function(json) {
 			json[key] = value;
 		} else if(manifest.isJsObject(obj)) ProcessManifest.traverseJson(obj);
 	}
-	Utils.pretty(json);
 	return json;
 };
 ProcessManifest.map_manifest = function(file,cb) {
 	var json = FileTools.toJson(file);
 	ProcessManifest.traverseJson(json);
+	FileTools.setContent(file,JSON.stringify(json));
 	cb(null,file);
 };
 ProcessManifest.task = function(options) {
@@ -454,9 +410,6 @@ Reflect.isObject = function(v) {
 	var t = typeof(v);
 	return t == "string" || t == "object" && v.__enum__ == null || t == "function" && (js_Boot.isClass(v) || js_Boot.isEnum(v)) != null;
 };
-Reflect.isEnumValue = function(v) {
-	return v != null && v.__enum__ != null;
-};
 Reflect.deleteField = function(o,field) {
 	if(!Reflect.hasField(o,field)) return false;
 	delete(o[field]);
@@ -498,10 +451,6 @@ StringBuf.prototype = {
 };
 var StringTools = function() { };
 StringTools.__name__ = ["StringTools"];
-StringTools.htmlEscape = function(s,quotes) {
-	s = s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-	if(quotes) return s.split("\"").join("&quot;").split("'").join("&#039;"); else return s;
-};
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
 };
@@ -529,17 +478,173 @@ StringTools.rtrim = function(s) {
 StringTools.trim = function(s) {
 	return StringTools.ltrim(StringTools.rtrim(s));
 };
+StringTools.lpad = function(s,c,l) {
+	if(c.length <= 0) return s;
+	while(s.length < l) s = c + s;
+	return s;
+};
 StringTools.replace = function(s,sub,by) {
 	return s.split(sub).join(by);
 };
+var buddy_Buddy = function() { };
+buddy_Buddy.__name__ = ["buddy","Buddy"];
 var Test = function() { };
 Test.__name__ = ["Test"];
+Test.__interfaces__ = [buddy_Buddy];
 Test.main = function() {
-	var r = new nanotest_NanoTestRunner();
-	r.add(new Md5Test({ fileName : "Test.hx", lineNumber : 8, className : "Test", methodName : "main"}));
-	r.add(new ManifestTest({ fileName : "Test.hx", lineNumber : 9, className : "Test", methodName : "main"}));
-	r.run();
+	var reporter = new buddy_reporting_ConsoleReporter();
+	var testsRunning = true;
+	var runner = new buddy_SuitesRunner([new Tests()],reporter);
+	runner.run().then(function(_) {
+		if(process.platform == 'win32') { process.once('exit', function() { process.exit(runner.statusCode()); }); } else { process.exit(runner.statusCode()); }
+	});
 };
+var buddy_BuddySuite = function() {
+	this.suites = new List();
+	this.befores = new List();
+	this.afters = new List();
+	this.suiteStack = new List();
+	this.timeoutMs = 5000;
+};
+buddy_BuddySuite.__name__ = ["buddy","BuddySuite"];
+buddy_BuddySuite.prototype = {
+	suites: null
+	,befores: null
+	,afters: null
+	,suiteStack: null
+	,timeoutMs: null
+	,describe: function(name,addSpecs) {
+		this.addSuite(new buddy_Suite(name,this),addSpecs);
+	}
+	,xdescribe: function(name,addSpecs) {
+	}
+	,before: function(init) {
+		this.syncBefore(init,true);
+	}
+	,after: function(deinit) {
+		this.syncAfter(deinit,true);
+	}
+	,it: function(desc,test) {
+		this.syncIt(desc,test,true);
+	}
+	,xit: function(desc,test) {
+		this.syncXit(desc,test,true);
+	}
+	,fail: function(desc) {
+		if(desc == null) desc = "Manually";
+	}
+	,failSync: function(test,desc,p) {
+		if(desc == null) desc = "Manually";
+		var stackItem = [haxe_StackItem.FilePos(null,p.fileName,p.lineNumber)];
+		test(false,Std.string(desc),stackItem);
+	}
+	,addSuite: function(suite,addSpecs) {
+		if(this.suiteStack.isEmpty()) this.suites.add(suite); else {
+			var current = this.suiteStack.first();
+			suite.parent = current;
+			current.steps.add(buddy_TestStep.TSuite(suite));
+		}
+		if(buddy_BuddySuite.includeMode && !suite.include) {
+			suite.steps = suite.steps.filter(function(step) {
+				switch(Type.enumIndex(step)) {
+				case 1:
+					var s = step[2];
+					return s.include;
+				default:
+					return true;
+				}
+			});
+			if(suite.steps.length > 0 || suite.parent != null && suite.parent.include) suite.include = true;
+		}
+		this.suiteStack.push(suite);
+		addSpecs();
+		this.suiteStack.pop();
+	}
+	,describeInclude: function(name,addSpecs) {
+		buddy_BuddySuite.includeMode = true;
+		var suite = new buddy_Suite(name,this);
+		suite.include = true;
+		this.addSuite(suite,addSpecs);
+	}
+	,itInclude: function(desc,test) {
+		buddy_BuddySuite.includeMode = true;
+		this.syncIt(desc,test,true,true);
+	}
+	,syncItInclude: function(desc,test) {
+		buddy_BuddySuite.includeMode = true;
+		this.syncIt(desc,test,false,true);
+	}
+	,beforeDescribe: function(init) {
+		this.syncBeforeDescribe(init,true);
+	}
+	,afterDescribe: function(init) {
+		this.syncAfterDescribe(init,true);
+	}
+	,syncBeforeDescribe: function(init,async) {
+		if(async == null) async = false;
+		this.befores.add(new buddy_BeforeAfter(init,async));
+	}
+	,syncAfterDescribe: function(init,async) {
+		if(async == null) async = false;
+		this.afters.add(new buddy_BeforeAfter(init,async));
+	}
+	,syncBefore: function(init,async) {
+		if(async == null) async = false;
+		this.suiteStack.first().before.add(new buddy_BeforeAfter(init,async));
+	}
+	,syncAfter: function(deinit,async) {
+		if(async == null) async = false;
+		this.suiteStack.first().after.add(new buddy_BeforeAfter(deinit,async));
+	}
+	,syncIt: function(desc,test,async,include) {
+		if(include == null) include = false;
+		if(async == null) async = false;
+		var suite = this.suiteStack.first();
+		var spec = new buddy_Spec(suite,desc,test,async);
+		spec.include = include;
+		suite.steps.add(buddy_TestStep.TSpec(spec));
+	}
+	,syncXit: function(desc,test,async) {
+		if(async == null) async = false;
+		var suite = this.suiteStack.first();
+		var spec = new buddy_Spec(suite,desc,test,async,true);
+		suite.steps.add(buddy_TestStep.TSpec(spec));
+	}
+	,__class__: buddy_BuddySuite
+};
+var Tests = function() {
+	var _g = this;
+	buddy_BuddySuite.call(this);
+	this.describe("test Md5",function() {
+		var file;
+		{
+			var v = new Vinyl({ cwd : "/", base : "/test/", path : "/test/file.coffee", contents : new js_node_buffer_Buffer("Hello world")});
+			file = v;
+		}
+		_g.syncIt("identity",function(__asyncDone,__status) {
+			buddy_ShouldString.should(FileTools.toMd5(file).basename,__status).be("file-3e25960a79dbc69b674cd4ec67a72c62.coffee",{ fileName : "Test.hx", lineNumber : 37, className : "Tests", methodName : "new"});
+		});
+	});
+	this.describe("manifest",function() {
+		var fileResult = null;
+		_g.before(function(done,__status1) {
+			var file1 = VinylTools.toVynil("./test/manifest.json");
+			ProcessManifest.map_manifest(file1,function(_,file2) {
+				fileResult = file2;
+				done();
+			});
+		});
+		_g.syncIt("manifest changed",function(__asyncDone1,__status2) {
+			haxe_Log.trace(fileResult,{ fileName : "Test.hx", lineNumber : 58, className : "Tests", methodName : "new"});
+			buddy_ShouldDynamic.should(TypePath.file,__status2).get_not().be(fileResult,{ fileName : "Test.hx", lineNumber : 59, className : "Tests", methodName : "new"});
+		});
+	});
+};
+Tests.__name__ = ["Tests"];
+Tests.__super__ = buddy_BuddySuite;
+Tests.prototype = $extend(buddy_BuddySuite.prototype,{
+	__class__: Tests
+});
 var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
 ValueType.TNull = ["TNull",0];
 ValueType.TNull.toString = $estr;
@@ -622,25 +727,6 @@ Type["typeof"] = function(v) {
 		return ValueType.TUnknown;
 	}
 };
-Type.enumEq = function(a,b) {
-	if(a == b) return true;
-	try {
-		if(a[0] != b[0]) return false;
-		var _g1 = 2;
-		var _g = a.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(!Type.enumEq(a[i],b[i])) return false;
-		}
-		var e = a.__enum__;
-		if(e != b.__enum__ || e == null) return false;
-	} catch( e1 ) {
-		haxe_CallStack.lastException = e1;
-		if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
-		return false;
-	}
-	return true;
-};
 Type.enumParameters = function(e) {
 	return e.slice(2);
 };
@@ -660,6 +746,748 @@ VinylTools.toVynil = function(path) {
 	{
 		var v = new Vinyl({ cwd : "/", base : PathTools.basePath(path), path : path, contents : new js_node_buffer_Buffer(js_node_Fs.readFileSync(path).toString())});
 		return v;
+	}
+};
+var buddy_TestStatus = { __ename__ : ["buddy","TestStatus"], __constructs__ : ["Unknown","Passed","Pending","Failed"] };
+buddy_TestStatus.Unknown = ["Unknown",0];
+buddy_TestStatus.Unknown.toString = $estr;
+buddy_TestStatus.Unknown.__enum__ = buddy_TestStatus;
+buddy_TestStatus.Passed = ["Passed",1];
+buddy_TestStatus.Passed.toString = $estr;
+buddy_TestStatus.Passed.__enum__ = buddy_TestStatus;
+buddy_TestStatus.Pending = ["Pending",2];
+buddy_TestStatus.Pending.toString = $estr;
+buddy_TestStatus.Pending.__enum__ = buddy_TestStatus;
+buddy_TestStatus.Failed = ["Failed",3];
+buddy_TestStatus.Failed.toString = $estr;
+buddy_TestStatus.Failed.__enum__ = buddy_TestStatus;
+var buddy_TestStep = { __ename__ : ["buddy","TestStep"], __constructs__ : ["TSuite","TSpec"] };
+buddy_TestStep.TSuite = function(s) { var $x = ["TSuite",0,s]; $x.__enum__ = buddy_TestStep; $x.toString = $estr; return $x; };
+buddy_TestStep.TSpec = function(s) { var $x = ["TSpec",1,s]; $x.__enum__ = buddy_TestStep; $x.toString = $estr; return $x; };
+var buddy_BeforeAfter = function(run,async) {
+	if(async == null) async = false;
+	this.run = run;
+	this.async = async;
+};
+buddy_BeforeAfter.__name__ = ["buddy","BeforeAfter"];
+buddy_BeforeAfter.prototype = {
+	async: null
+	,run: null
+	,__class__: buddy_BeforeAfter
+};
+var buddy_Suite = function(name,buddySuite) {
+	if(name == null) throw new js__$Boot_HaxeError("Suite requires a name.");
+	if(buddySuite == null) throw new js__$Boot_HaxeError("Suite requires a BuddySuite.");
+	this.name = name;
+	this.buddySuite = buddySuite;
+	this.before = new List();
+	this.after = new List();
+	this.steps = new List();
+};
+buddy_Suite.__name__ = ["buddy","Suite"];
+buddy_Suite.prototype = {
+	name: null
+	,buddySuite: null
+	,parent: null
+	,include: null
+	,steps: null
+	,get_specs: function() {
+		var output = new List();
+		var $it0 = this.steps.iterator();
+		while( $it0.hasNext() ) {
+			var step = $it0.next();
+			switch(Type.enumIndex(step)) {
+			case 1:
+				var s = step[2];
+				output.add(s);
+				break;
+			default:
+			}
+		}
+		return output;
+	}
+	,get_suites: function() {
+		var output = new List();
+		var $it0 = this.steps.iterator();
+		while( $it0.hasNext() ) {
+			var step = $it0.next();
+			switch(Type.enumIndex(step)) {
+			case 0:
+				var s = step[2];
+				output.add(s);
+				break;
+			default:
+			}
+		}
+		return output;
+	}
+	,before: null
+	,after: null
+	,__class__: buddy_Suite
+};
+var buddy_Spec = function(suite,description,run,async,pending) {
+	if(pending == null) pending = false;
+	if(async == null) async = false;
+	this.suite = suite;
+	this.description = description;
+	this.run = run;
+	this.async = async;
+	this.traces = new List();
+	if(run == null) this.status = buddy_TestStatus.Pending; else if(pending) this.status = buddy_TestStatus.Pending; else this.status = buddy_TestStatus.Unknown;
+};
+buddy_Spec.__name__ = ["buddy","Spec"];
+buddy_Spec.prototype = {
+	suite: null
+	,description: null
+	,async: null
+	,status: null
+	,error: null
+	,stack: null
+	,traces: null
+	,include: null
+	,run: null
+	,setStatus: function(s,err,stack) {
+		this.status = s;
+		this.error = err;
+		this.stack = stack;
+	}
+	,__class__: buddy_Spec
+};
+var buddy_Should = function(value,assert,inverse) {
+	if(inverse == null) inverse = false;
+	this.value = value;
+	this.assert = assert;
+	this.inverse = inverse;
+};
+buddy_Should.__name__ = ["buddy","Should"];
+buddy_Should.prototype = {
+	value: null
+	,assert: null
+	,inverse: null
+	,be: function(expected,p) {
+		this.test(this.value == expected,p,"Expected " + this.quote(expected) + ", was " + this.quote(this.value),"Didn't expect " + this.quote(expected) + " but was equal to that");
+	}
+	,beType: function(type,p) {
+		this.test(Std["is"](this.value,type),p,"Expected " + this.quote(this.value) + " to be type " + this.quote(type),"Expected " + this.quote(this.value) + " not to be type " + this.quote(type));
+	}
+	,quote: function(v) {
+		if(typeof(v) == "string") return "\"" + Std.string(v) + "\""; else return Std.string(v);
+	}
+	,stackPos: function(p) {
+		return [haxe_StackItem.FilePos(null,p.fileName,p.lineNumber)];
+	}
+	,test: function(expr,p,error,errorInverted) {
+		if(!this.inverse) this.assert(expr,error,this.stackPos(p)); else this.assert(!expr,errorInverted,this.stackPos(p));
+	}
+	,__class__: buddy_Should
+};
+var buddy_ShouldDynamic = function(value,assert,inverse) {
+	buddy_Should.call(this,value,assert,inverse);
+};
+buddy_ShouldDynamic.__name__ = ["buddy","ShouldDynamic"];
+buddy_ShouldDynamic.should = function(d,assert) {
+	return new buddy_ShouldDynamic(d,assert);
+};
+buddy_ShouldDynamic.__super__ = buddy_Should;
+buddy_ShouldDynamic.prototype = $extend(buddy_Should.prototype,{
+	get_not: function() {
+		return new buddy_ShouldDynamic(this.value,this.assert,!this.inverse);
+	}
+	,__class__: buddy_ShouldDynamic
+});
+var buddy_ShouldInt = function(value,assert,inverse) {
+	if(inverse == null) inverse = false;
+	buddy_Should.call(this,value,assert,inverse);
+};
+buddy_ShouldInt.__name__ = ["buddy","ShouldInt"];
+buddy_ShouldInt.should = function(i,assert) {
+	return new buddy_ShouldInt(i,assert);
+};
+buddy_ShouldInt.__super__ = buddy_Should;
+buddy_ShouldInt.prototype = $extend(buddy_Should.prototype,{
+	get_not: function() {
+		return new buddy_ShouldInt(this.value,this.assert,!this.inverse);
+	}
+	,beLessThan: function(expected,p) {
+		this.test(this.value < expected,p,"Expected less than " + this.quote(expected) + ", was " + this.quote(this.value),"Expected not less than " + this.quote(expected) + ", was " + this.quote(this.value));
+	}
+	,beGreaterThan: function(expected,p) {
+		this.test(this.value > expected,p,"Expected greater than " + this.quote(expected) + ", was " + this.quote(this.value),"Expected not greater than " + this.quote(expected) + ", was " + this.quote(this.value));
+	}
+	,__class__: buddy_ShouldInt
+});
+var buddy_ShouldFloat = function(value,assert,inverse) {
+	if(inverse == null) inverse = false;
+	buddy_Should.call(this,value,assert,inverse);
+};
+buddy_ShouldFloat.__name__ = ["buddy","ShouldFloat"];
+buddy_ShouldFloat.should = function(i,assert) {
+	return new buddy_ShouldFloat(i,assert);
+};
+buddy_ShouldFloat.__super__ = buddy_Should;
+buddy_ShouldFloat.prototype = $extend(buddy_Should.prototype,{
+	get_not: function() {
+		return new buddy_ShouldFloat(this.value,this.assert,!this.inverse);
+	}
+	,beLessThan: function(expected,p) {
+		this.test(this.value < expected,p,"Expected less than " + this.quote(expected) + ", was " + this.quote(this.value),"Expected not less than " + this.quote(expected) + ", was " + this.quote(this.value));
+	}
+	,beGreaterThan: function(expected,p) {
+		this.test(this.value > expected,p,"Expected greater than " + this.quote(expected) + ", was " + this.quote(this.value),"Expected not greater than " + this.quote(expected) + ", was " + this.quote(this.value));
+	}
+	,beCloseTo: function(expected,precision,p) {
+		if(precision == null) precision = 2;
+		var expr = Math.abs(expected - this.value) < Math.pow(10,-precision) / 2;
+		this.test(expr,p,"Expected close to " + this.quote(expected) + ", was " + this.quote(this.value),"Expected " + this.quote(this.value) + " not to be close to " + this.quote(expected));
+	}
+	,__class__: buddy_ShouldFloat
+});
+var buddy_ShouldString = function(value,assert,inverse) {
+	if(inverse == null) inverse = false;
+	buddy_Should.call(this,value,assert,inverse);
+};
+buddy_ShouldString.__name__ = ["buddy","ShouldString"];
+buddy_ShouldString.should = function(str,assert) {
+	return new buddy_ShouldString(str,assert);
+};
+buddy_ShouldString.__super__ = buddy_Should;
+buddy_ShouldString.prototype = $extend(buddy_Should.prototype,{
+	get_not: function() {
+		return new buddy_ShouldString(this.value,this.assert,!this.inverse);
+	}
+	,contain: function(substring,p) {
+		this.test(this.value.indexOf(substring) >= 0,p,"Expected " + this.quote(this.value) + " to contain " + this.quote(substring),"Expected " + this.quote(this.value) + " not to contain " + this.quote(substring));
+	}
+	,startWith: function(substring,p) {
+		this.test(StringTools.startsWith(this.value,substring),p,"Expected " + this.quote(this.value) + " to start with " + this.quote(substring),"Expected " + this.quote(this.value) + " not to start with " + this.quote(substring));
+	}
+	,endWith: function(substring,p) {
+		this.test(StringTools.endsWith(this.value,substring),p,"Expected " + this.quote(this.value) + " to end with " + this.quote(substring),"Expected " + this.quote(this.value) + " not to end with " + this.quote(substring));
+	}
+	,match: function(regexp,p) {
+		this.test(regexp.match(this.value),p,"Expected " + this.quote(this.value) + " to match regular expression","Expected " + this.quote(this.value) + " not to match regular expression");
+	}
+	,__class__: buddy_ShouldString
+});
+var buddy_ShouldIterable = function(value,assert,inverse) {
+	if(inverse == null) inverse = false;
+	buddy_Should.call(this,value,assert,inverse);
+};
+buddy_ShouldIterable.__name__ = ["buddy","ShouldIterable"];
+buddy_ShouldIterable.should = function(value,assert) {
+	return new buddy_ShouldIterable(value,assert);
+};
+buddy_ShouldIterable.__super__ = buddy_Should;
+buddy_ShouldIterable.prototype = $extend(buddy_Should.prototype,{
+	get_not: function() {
+		return new buddy_ShouldIterable(this.value,this.assert,!this.inverse);
+	}
+	,contain: function(o,p) {
+		this.test(Lambda.exists(this.value,function(el) {
+			return el == o;
+		}),p,"Expected " + this.quote(this.value) + " to contain " + this.quote(o),"Expected " + this.quote(this.value) + " not to contain " + this.quote(o));
+	}
+	,containAll: function(values,p) {
+		var expr = true;
+		var $it0 = $iterator(values)();
+		while( $it0.hasNext() ) {
+			var a = $it0.next();
+			var a1 = [a];
+			if(!Lambda.exists(this.value,(function(a1) {
+				return function(v) {
+					return v == a1[0];
+				};
+			})(a1))) {
+				expr = false;
+				break;
+			}
+		}
+		this.test(expr,p,"Expected " + this.quote(this.value) + " to contain all of " + this.quote(values),"Expected " + this.quote(this.value) + " not to contain all of " + this.quote(values));
+	}
+	,containExactly: function(values,p) {
+		var a = $iterator(this.value)();
+		var b = $iterator(values)();
+		var expr = true;
+		while(a.hasNext() || b.hasNext()) if(a.next() != b.next()) {
+			expr = false;
+			break;
+		}
+		this.test(expr,p,"Expected " + this.quote(this.value) + " to contain exactly " + this.quote(values),"Expected " + this.quote(this.value) + " not to contain exactly " + this.quote(values));
+	}
+	,__class__: buddy_ShouldIterable
+});
+var buddy_ShouldFunctions = function(value,assert,inverse) {
+	if(inverse == null) inverse = false;
+	this.value = value;
+	this.assert = assert;
+	this.inverse = inverse;
+};
+buddy_ShouldFunctions.__name__ = ["buddy","ShouldFunctions"];
+buddy_ShouldFunctions.should = function(value,assert) {
+	return new buddy_ShouldFunctions(value,assert);
+};
+buddy_ShouldFunctions.prototype = {
+	value: null
+	,assert: null
+	,inverse: null
+	,get_not: function() {
+		return new buddy_ShouldFunctions(this.value,this.assert,!this.inverse);
+	}
+	,throwValue: function(v,p) {
+		var expr = false;
+		try {
+			this.value();
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			expr = e == v;
+		}
+		this.test(expr,p,"Expected " + this.quote(this.value) + " to throw " + this.quote(v),"Expected " + this.quote(this.value) + " not to throw " + this.quote(v));
+	}
+	,throwType: function(type,p) {
+		var expr = false;
+		var name = null;
+		try {
+			this.value();
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			name = Type.getClassName(type);
+			expr = Std["is"](e,type);
+		}
+		this.test(expr,p,"Expected " + this.quote(this.value) + " to throw type " + name,"Expected " + this.quote(this.value) + " not to throw type " + name);
+	}
+	,be: function(expected,p) {
+		this.test(this.value == expected,p,"Expected " + this.quote(expected) + ", was " + this.quote(this.value),"Didn't expect " + this.quote(expected) + " but was equal to that");
+	}
+	,quote: function(v) {
+		if(typeof(v) == "string") return "\"" + Std.string(v) + "\""; else return Std.string(v);
+	}
+	,stackPos: function(p) {
+		return [haxe_StackItem.FilePos(null,p.fileName,p.lineNumber)];
+	}
+	,test: function(expr,p,error,errorInverted) {
+		if(!this.inverse) this.assert(expr,error,this.stackPos(p)); else this.assert(!expr,errorInverted,this.stackPos(p));
+	}
+	,__class__: buddy_ShouldFunctions
+};
+var buddy_SuitesRunner = function(buddySuites,reporter) {
+	var includeMode;
+	includeMode = ((function($this) {
+		var $r;
+		var _g = [];
+		var $it0 = $iterator(buddySuites)();
+		while( $it0.hasNext() ) {
+			var b = $it0.next();
+			var $it1 = b.suites.iterator();
+			while( $it1.hasNext() ) {
+				var s = $it1.next();
+				if(s.include) _g.push(s);
+			}
+		}
+		$r = _g;
+		return $r;
+	}(this))).length > 0;
+	var _g1 = [];
+	var $it2 = $iterator(buddySuites)();
+	while( $it2.hasNext() ) {
+		var b1 = $it2.next();
+		var $it3 = b1.suites.iterator();
+		while( $it3.hasNext() ) {
+			var s1 = $it3.next();
+			if(!includeMode || s1.include) _g1.push(s1);
+		}
+	}
+	this.suites = _g1;
+	if(reporter == null) this.reporter = new buddy_reporting_ConsoleReporter(); else this.reporter = reporter;
+};
+buddy_SuitesRunner.__name__ = ["buddy","SuitesRunner"];
+buddy_SuitesRunner.prototype = {
+	suites: null
+	,reporter: null
+	,aborted: null
+	,run: function() {
+		var _g = this;
+		var def = new promhx_Deferred();
+		var defPr = def.promise();
+		this.reporter.start().then(function(ok) {
+			if(ok) buddy_tools_AsyncTools.iterateAsyncBool(_g.suites,$bind(_g,_g.runSuite)).pipe(function(_) {
+				return _g.reporter.done(_g.suites,!_g.failed());
+			}).then(function(_1) {
+				def.resolve(ok);
+			}); else {
+				_g.aborted = true;
+				def.resolve(ok);
+			}
+		});
+		return defPr;
+	}
+	,failed: function() {
+		var testFail = null;
+		testFail = function(s) {
+			var failed = false;
+			var $it0 = s.steps.iterator();
+			while( $it0.hasNext() ) {
+				var step = $it0.next();
+				switch(Type.enumIndex(step)) {
+				case 1:
+					var sp = step[2];
+					if(sp.status == buddy_TestStatus.Failed) return true;
+					break;
+				case 0:
+					var s2 = step[2];
+					if(testFail(s2)) return true;
+					break;
+				}
+			}
+			return false;
+		};
+		var $it1 = $iterator(this.suites)();
+		while( $it1.hasNext() ) {
+			var s1 = $it1.next();
+			if(testFail(s1)) return true;
+		}
+		return false;
+	}
+	,statusCode: function() {
+		if(this.aborted) return 1;
+		if(this.failed()) return 1; else return 0;
+	}
+	,runSuite: function(suite) {
+		return new buddy_internal_SuiteRunner(suite,this.reporter).run();
+	}
+	,__class__: buddy_SuitesRunner
+};
+var buddy_internal_SuiteRunner = function(suite,reporter) {
+	this.buddySuite = suite.buddySuite;
+	this.suite = suite;
+	this.reporter = reporter;
+};
+buddy_internal_SuiteRunner.__name__ = ["buddy","internal","SuiteRunner"];
+buddy_internal_SuiteRunner.prototype = {
+	buddySuite: null
+	,suite: null
+	,reporter: null
+	,run: function() {
+		var _g = this;
+		var traceFunc = haxe_Log.trace;
+		var def = new promhx_Deferred();
+		var pr = def.promise();
+		buddy_tools_AsyncTools.iterateAsyncBool(this.suite.steps,$bind(this,this.runSteps)).then(function(_) {
+			haxe_Log.trace = traceFunc;
+			def.resolve(_g.suite);
+		});
+		return pr;
+	}
+	,allBefores: function(suite,list) {
+		list = Lambda.concat(suite.before,list);
+		if(suite.parent != null) return this.allBefores(suite.parent,list); else return Lambda.concat(this.buddySuite.befores,list);
+	}
+	,allAfters: function(suite,list) {
+		list = Lambda.concat(suite.after,list);
+		if(suite.parent != null) return this.allAfters(suite.parent,list);
+		list = Lambda.concat(this.buddySuite.afters,list);
+		var output = new List();
+		var $it0 = list.iterator();
+		while( $it0.hasNext() ) {
+			var a = $it0.next();
+			output.push(a);
+		}
+		return output;
+	}
+	,runBeforeAfter: function(b) {
+		var def = new promhx_Deferred();
+		var pr = def.promise();
+		var done = function(calledFromSpec) {
+			if(calledFromSpec == null) calledFromSpec = false;
+			def.resolve(b);
+		};
+		b.run(done,function(s,err,stack) {
+		});
+		if(!b.async) done();
+		return pr;
+	}
+	,runSteps: function(step) {
+		var stepDone = new promhx_Deferred();
+		var stepPr = stepDone.promise();
+		switch(Type.enumIndex(step)) {
+		case 1:
+			var spec = step[2];
+			this.runSpec(spec).then(function(_) {
+				stepDone.resolve(step);
+			});
+			break;
+		case 0:
+			var s = step[2];
+			new buddy_internal_SuiteRunner(s,this.reporter).run().then(function(_1) {
+				stepDone.resolve(step);
+			});
+			break;
+		}
+		return stepPr;
+	}
+	,runSpec: function(spec) {
+		var _g = this;
+		var specDone = new promhx_Deferred();
+		var specPr = specDone.promise();
+		specPr.pipe(function(s1) {
+			if(_g.reporter != null) return _g.reporter.progress(s1); else return specPr;
+		});
+		if(spec.status != buddy_TestStatus.Unknown) {
+			specDone.resolve(spec);
+			return specPr;
+		}
+		var itDone = new promhx_Deferred();
+		var itPromise = itDone.promise();
+		var hasStatus = false;
+		var status = function(s,error,stack) {
+			hasStatus = true;
+			if(!s && !itPromise.isResolved() && !itDone.isResolved()) itDone.resolve({ status : buddy_TestStatus.Failed, error : error, stack : stack});
+		};
+		var done = function(calledFromSpec) {
+			if(calledFromSpec == null) calledFromSpec = true;
+			if(!itPromise.isResolved() && !itDone.isResolved()) {
+				if(calledFromSpec) hasStatus = true;
+				itDone.resolve({ status : hasStatus?buddy_TestStatus.Passed:buddy_TestStatus.Pending, error : null, stack : null});
+			}
+		};
+		haxe_Log.trace = function(v,pos) {
+			spec.traces.add(pos.fileName + ":" + pos.lineNumber + ": " + Std.string(v));
+		};
+		var befores = this.allBefores(this.suite,new List());
+		var afters = this.allAfters(this.suite,new List());
+		var errorTimeout = null;
+		buddy_tools_AsyncTools.iterateAsyncBool(befores,$bind(this,this.runBeforeAfter)).pipe(function(_) {
+			if(spec.async) {
+				var timeout = _g.buddySuite.timeoutMs;
+				errorTimeout = buddy_tools_AsyncTools.wait(timeout);
+				errorTimeout.catchError(function(e) {
+					if(e != null) throw new js__$Boot_HaxeError(e);
+				}).then(function(_1) {
+					status(false,"Timeout after " + timeout + " ms",null);
+				});
+			}
+			try {
+				spec.run(done,status);
+				if(!spec.async) done(false);
+			} catch( e1 ) {
+				haxe_CallStack.lastException = e1;
+				if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
+				status(false,Std.string(e1),haxe_CallStack.exceptionStack());
+			}
+			return itPromise;
+		}).pipe(function(result) {
+			if(errorTimeout != null) {
+				errorTimeout.reject(null);
+				errorTimeout = null;
+			}
+			spec.setStatus(result.status,result.error,result.stack);
+			return buddy_tools_AsyncTools.iterateAsyncBool(afters,$bind(_g,_g.runBeforeAfter));
+		}).then(function(_2) {
+			specDone.resolve(spec);
+		});
+		return specPr;
+	}
+	,__class__: buddy_internal_SuiteRunner
+};
+var buddy_internal_sys_NodeJs = function() { };
+buddy_internal_sys_NodeJs.__name__ = ["buddy","internal","sys","NodeJs"];
+buddy_internal_sys_NodeJs.print = function(s) {
+	process.stdout.write(s);
+};
+buddy_internal_sys_NodeJs.println = function(s) {
+	console.log(s);
+};
+var buddy_reporting_Reporter = function() { };
+buddy_reporting_Reporter.__name__ = ["buddy","reporting","Reporter"];
+buddy_reporting_Reporter.prototype = {
+	start: null
+	,progress: null
+	,done: null
+	,__class__: buddy_reporting_Reporter
+};
+var buddy_reporting_TraceReporter = function() {
+};
+buddy_reporting_TraceReporter.__name__ = ["buddy","reporting","TraceReporter"];
+buddy_reporting_TraceReporter.__interfaces__ = [buddy_reporting_Reporter];
+buddy_reporting_TraceReporter.prototype = {
+	start: function() {
+		return this.resolveImmediately(true);
+	}
+	,progress: function(spec) {
+		return this.resolveImmediately(spec);
+	}
+	,done: function(suites,status) {
+		var _g = this;
+		this.println("");
+		var total = 0;
+		var failures = 0;
+		var pending = 0;
+		var countTests = null;
+		var printTests = null;
+		countTests = function(s) {
+			var $it0 = s.steps.iterator();
+			while( $it0.hasNext() ) {
+				var sp = $it0.next();
+				switch(Type.enumIndex(sp)) {
+				case 1:
+					var sp1 = sp[2];
+					total++;
+					if(sp1.status == buddy_TestStatus.Failed) failures++; else if(sp1.status == buddy_TestStatus.Pending) pending++;
+					break;
+				case 0:
+					var s1 = sp[2];
+					countTests(s1);
+					break;
+				}
+			}
+		};
+		Lambda.iter(suites,countTests);
+		printTests = function(s2,indentLevel) {
+			var print = function(str) {
+				_g.println(StringTools.lpad(str," ",str.length + indentLevel * 2));
+			};
+			print(s2.name);
+			var $it1 = s2.steps.iterator();
+			while( $it1.hasNext() ) {
+				var step = $it1.next();
+				switch(Type.enumIndex(step)) {
+				case 1:
+					var sp2 = step[2];
+					if(sp2.status == buddy_TestStatus.Failed) {
+						print("  " + sp2.description + " (FAILED: " + sp2.error + ")");
+						_g.printTraces(sp2);
+						if(sp2.stack == null || sp2.stack.length == 0) continue;
+						var _g1 = 0;
+						var _g2 = sp2.stack;
+						while(_g1 < _g2.length) {
+							var s3 = _g2[_g1];
+							++_g1;
+							switch(Type.enumIndex(s3)) {
+							case 2:
+								var line = s3[4];
+								var file = s3[3];
+								if(file.indexOf("buddy/internal/") != 0) print("    @ " + file + ":" + line); else {
+								}
+								break;
+							default:
+							}
+						}
+					} else {
+						print("  " + sp2.description + " (" + Std.string(sp2.status) + ")");
+						_g.printTraces(sp2);
+					}
+					break;
+				case 0:
+					var s4 = step[2];
+					printTests(s4,indentLevel + 1);
+					break;
+				}
+			}
+		};
+		Lambda.iter(suites,(function(f,a2) {
+			return function(a1) {
+				f(a1,a2);
+			};
+		})(printTests,0));
+		this.println("" + total + " specs, " + failures + " failures, " + pending + " pending");
+		return this.resolveImmediately(suites);
+	}
+	,printTraces: function(spec) {
+		var $it0 = spec.traces.iterator();
+		while( $it0.hasNext() ) {
+			var t = $it0.next();
+			this.println("    " + t);
+		}
+	}
+	,print: function(s) {
+	}
+	,println: function(s) {
+		haxe_Log.trace(s,{ fileName : "TraceReporter.hx", lineNumber : 105, className : "buddy.reporting.TraceReporter", methodName : "println"});
+	}
+	,resolveImmediately: function(o) {
+		var def = new promhx_Deferred();
+		var pr = def.promise();
+		def.resolve(o);
+		return pr;
+	}
+	,__class__: buddy_reporting_TraceReporter
+};
+var buddy_reporting_ConsoleReporter = function() {
+	buddy_reporting_TraceReporter.call(this);
+};
+buddy_reporting_ConsoleReporter.__name__ = ["buddy","reporting","ConsoleReporter"];
+buddy_reporting_ConsoleReporter.__super__ = buddy_reporting_TraceReporter;
+buddy_reporting_ConsoleReporter.prototype = $extend(buddy_reporting_TraceReporter.prototype,{
+	start: function() {
+		return this.resolveImmediately(true);
+	}
+	,progress: function(spec) {
+		this.print((function($this) {
+			var $r;
+			var _g = spec.status;
+			$r = (function($this) {
+				var $r;
+				switch(Type.enumIndex(_g)) {
+				case 3:
+					$r = "X";
+					break;
+				case 1:
+					$r = ".";
+					break;
+				case 2:
+					$r = "P";
+					break;
+				case 0:
+					$r = "?";
+					break;
+				}
+				return $r;
+			}($this));
+			return $r;
+		}(this)));
+		return this.resolveImmediately(spec);
+	}
+	,done: function(suites,status) {
+		var output = buddy_reporting_TraceReporter.prototype.done.call(this,suites,status);
+		return output;
+	}
+	,print: function(s) {
+		buddy_internal_sys_NodeJs.print(s);
+	}
+	,println: function(s) {
+		buddy_internal_sys_NodeJs.println(s);
+	}
+	,__class__: buddy_reporting_ConsoleReporter
+});
+var buddy_tools_AsyncTools = function() { };
+buddy_tools_AsyncTools.__name__ = ["buddy","tools","AsyncTools"];
+buddy_tools_AsyncTools.iterateAsyncBool = function(it,action) {
+	return buddy_tools_AsyncTools.iterateAsync(it,action,true);
+};
+buddy_tools_AsyncTools.iterateAsync = function(it,action,resolveWith) {
+	var finished = new promhx_Deferred();
+	var pr = finished.promise();
+	buddy_tools_AsyncTools.next($iterator(it)(),action,finished,resolveWith);
+	return pr;
+};
+buddy_tools_AsyncTools.wait = function(ms) {
+	var def = new promhx_Deferred();
+	var pr = def.promise();
+	var done = function() {
+		if(!pr.isFulfilled()) def.resolve(true);
+	};
+	haxe_Timer.delay(function() {
+		done();
+	},ms);
+	return pr;
+};
+buddy_tools_AsyncTools.next = function(it,action,def,resolveWith) {
+	if(!it.hasNext()) def.resolve(resolveWith); else {
+		var n = it.next();
+		action(n).then(function(_) {
+			buddy_tools_AsyncTools.next(it,action,def,resolveWith);
+		});
 	}
 };
 var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
@@ -792,6 +1620,42 @@ haxe_IMap.prototype = {
 	,keys: null
 	,__class__: haxe_IMap
 };
+var haxe_Log = function() { };
+haxe_Log.__name__ = ["haxe","Log"];
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
+};
+var haxe_Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+haxe_Timer.__name__ = ["haxe","Timer"];
+haxe_Timer.delay = function(f,time_ms) {
+	var t = new haxe_Timer(time_ms);
+	t.run = function() {
+		t.stop();
+		f();
+	};
+	return t;
+};
+haxe_Timer.prototype = {
+	id: null
+	,stop: function() {
+		if(this.id == null) return;
+		clearInterval(this.id);
+		this.id = null;
+	}
+	,run: function() {
+	}
+	,__class__: haxe_Timer
+};
+var haxe_ds_Option = { __ename__ : ["haxe","ds","Option"], __constructs__ : ["Some","None"] };
+haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds_Option; $x.toString = $estr; return $x; };
+haxe_ds_Option.None = ["None",1];
+haxe_ds_Option.None.toString = $estr;
+haxe_ds_Option.None.__enum__ = haxe_ds_Option;
 var haxe_ds_StringMap = function() {
 	this.h = { };
 };
@@ -843,66 +1707,6 @@ haxe_ds_StringMap.prototype = {
 	}
 	,__class__: haxe_ds_StringMap
 };
-var haxe_unit_TestCase = function() {
-};
-haxe_unit_TestCase.__name__ = ["haxe","unit","TestCase"];
-haxe_unit_TestCase.prototype = {
-	currentTest: null
-	,setup: function() {
-	}
-	,tearDown: function() {
-	}
-	,print: function(v) {
-		haxe_unit_TestRunner.print(v);
-	}
-	,assertTrue: function(b,c) {
-		this.currentTest.done = true;
-		if(b != true) {
-			this.currentTest.success = false;
-			this.currentTest.error = "expected true but was false";
-			this.currentTest.posInfos = c;
-			throw new js__$Boot_HaxeError(this.currentTest);
-		}
-	}
-	,assertFalse: function(b,c) {
-		this.currentTest.done = true;
-		if(b == true) {
-			this.currentTest.success = false;
-			this.currentTest.error = "expected false but was true";
-			this.currentTest.posInfos = c;
-			throw new js__$Boot_HaxeError(this.currentTest);
-		}
-	}
-	,assertEquals: function(expected,actual,c) {
-		this.currentTest.done = true;
-		if(actual != expected) {
-			this.currentTest.success = false;
-			this.currentTest.error = "expected '" + Std.string(expected) + "' but was '" + Std.string(actual) + "'";
-			this.currentTest.posInfos = c;
-			throw new js__$Boot_HaxeError(this.currentTest);
-		}
-	}
-	,__class__: haxe_unit_TestCase
-};
-var haxe_unit_TestRunner = function() { };
-haxe_unit_TestRunner.__name__ = ["haxe","unit","TestRunner"];
-haxe_unit_TestRunner.print = function(v) {
-	var msg = js_Boot.__string_rec(v,"");
-	var d;
-	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) {
-		msg = StringTools.htmlEscape(msg).split("\n").join("<br/>");
-		d.innerHTML += msg + "<br/>";
-	} else if(typeof process != "undefined" && process.stdout != null && process.stdout.write != null) process.stdout.write(msg); else if(typeof console != "undefined" && console.log != null) console.log(msg);
-};
-var haxe_unit_TestStatus = function() { };
-haxe_unit_TestStatus.__name__ = ["haxe","unit","TestStatus"];
-haxe_unit_TestStatus.prototype = {
-	done: null
-	,success: null
-	,error: null
-	,posInfos: null
-	,__class__: haxe_unit_TestStatus
-};
 var js__$Boot_HaxeError = function(val) {
 	Error.call(this);
 	this.val = val;
@@ -917,6 +1721,25 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = ["js","Boot"];
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg;
+	if(i != null) msg = i.fileName + ":" + i.lineNumber + ": "; else msg = "";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js_Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
+};
 js_Boot.isClass = function(o) {
 	return o.__name__;
 };
@@ -1059,161 +1882,565 @@ js_Boot.__resolveNativeClass = function(name) {
 var js_node_Crypto = require("crypto");
 var js_node_Fs = require("fs");
 var js_node_buffer_Buffer = require("buffer").Buffer;
-var nanotest_NanoTestAssertResult = function(_result,position) {
-	this.result = _result;
-	this.position = position;
+var promhx_base_AsyncBase = function(d) {
+	this.id = promhx_base_AsyncBase.id_ctr += 1;
+	this._resolved = false;
+	this._pending = false;
+	this._errorPending = false;
+	this._fulfilled = false;
+	this._update = [];
+	this._error = [];
+	this._errored = false;
+	if(d != null) promhx_base_AsyncBase.link(d,this,function(x) {
+		return x;
+	});
 };
-nanotest_NanoTestAssertResult.__name__ = ["nanotest","NanoTestAssertResult"];
-nanotest_NanoTestAssertResult.prototype = {
-	result: null
-	,position: null
-	,label: function(d) {
-		{
-			var _g = this.result.status[this.position];
-			switch(Type.enumIndex(_g)) {
-			case 0:
-				break;
-			case 1:
-				var p = _g[3];
-				var mes = _g[2];
-				this.result.status[this.position] = nanotest_NanoTestStatus.FAIL("" + mes + " [" + Std.string(d) + "]",p);
-				break;
-			case 2:
-				var p1 = _g[3];
-				var mes1 = _g[2];
-				this.result.status[this.position] = nanotest_NanoTestStatus.ERROR("" + mes1 + " [" + Std.string(d) + "]",p1);
-				break;
+promhx_base_AsyncBase.__name__ = ["promhx","base","AsyncBase"];
+promhx_base_AsyncBase.link = function(current,next,f) {
+	current._update.push({ async : next, linkf : function(x) {
+		next.handleResolve(f(x));
+	}});
+	promhx_base_AsyncBase.immediateLinkUpdate(current,next,f);
+};
+promhx_base_AsyncBase.immediateLinkUpdate = function(current,next,f) {
+	if(current.isErrored()) next.handleError(current._errorVal);
+	if(current.isResolved() && !current.isPending()) try {
+		next.handleResolve(f(current._val));
+	} catch( e ) {
+		haxe_CallStack.lastException = e;
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
+		next.handleError(e);
+	}
+};
+promhx_base_AsyncBase.linkAll = function(all,next) {
+	var cthen = function(arr,current,v) {
+		if(arr.length == 0 || promhx_base_AsyncBase.allFulfilled(arr)) {
+			var vals;
+			var _g = [];
+			var $it0 = $iterator(all)();
+			while( $it0.hasNext() ) {
+				var a = $it0.next();
+				_g.push(a == current?v:a._val);
 			}
+			vals = _g;
+			next.handleResolve(vals);
 		}
+		null;
+		return;
+	};
+	var $it1 = $iterator(all)();
+	while( $it1.hasNext() ) {
+		var a1 = $it1.next();
+		a1._update.push({ async : next, linkf : (function(f,a11,a2) {
+			return function(v1) {
+				f(a11,a2,v1);
+				return;
+			};
+		})(cthen,(function($this) {
+			var $r;
+			var _g1 = [];
+			var $it2 = $iterator(all)();
+			while( $it2.hasNext() ) {
+				var a21 = $it2.next();
+				if(a21 != a1) _g1.push(a21);
+			}
+			$r = _g1;
+			return $r;
+		}(this)),a1)});
+	}
+	if(promhx_base_AsyncBase.allFulfilled(all)) next.handleResolve((function($this) {
+		var $r;
+		var _g2 = [];
+		var $it3 = $iterator(all)();
+		while( $it3.hasNext() ) {
+			var a3 = $it3.next();
+			_g2.push(a3._val);
+		}
+		$r = _g2;
+		return $r;
+	}(this)));
+};
+promhx_base_AsyncBase.pipeLink = function(current,ret,f) {
+	var linked = false;
+	var linkf = function(x) {
+		if(!linked) {
+			linked = true;
+			var pipe_ret = f(x);
+			pipe_ret._update.push({ async : ret, linkf : $bind(ret,ret.handleResolve)});
+			promhx_base_AsyncBase.immediateLinkUpdate(pipe_ret,ret,function(x1) {
+				return x1;
+			});
+		}
+	};
+	current._update.push({ async : ret, linkf : linkf});
+	if(current.isResolved() && !current.isPending()) try {
+		linkf(current._val);
+	} catch( e ) {
+		haxe_CallStack.lastException = e;
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
+		ret.handleError(e);
+	}
+};
+promhx_base_AsyncBase.allResolved = function($as) {
+	var $it0 = $iterator($as)();
+	while( $it0.hasNext() ) {
+		var a = $it0.next();
+		if(!a.isResolved()) return false;
+	}
+	return true;
+};
+promhx_base_AsyncBase.allFulfilled = function($as) {
+	var $it0 = $iterator($as)();
+	while( $it0.hasNext() ) {
+		var a = $it0.next();
+		if(!a.isFulfilled()) return false;
+	}
+	return true;
+};
+promhx_base_AsyncBase.prototype = {
+	id: null
+	,_val: null
+	,_resolved: null
+	,_fulfilled: null
+	,_pending: null
+	,_update: null
+	,_error: null
+	,_errored: null
+	,_errorMap: null
+	,_errorVal: null
+	,_errorPending: null
+	,catchError: function(f) {
+		this._error.push(f);
 		return this;
 	}
-	,__class__: nanotest_NanoTestAssertResult
-};
-var nanotest_NanoTestRunner = function(printError) {
-	this.cases = [];
-	if(printError == null) this.printError = nanotest_NanoTestRunner.warning; else this.printError = printError;
-};
-nanotest_NanoTestRunner.__name__ = ["nanotest","NanoTestRunner"];
-nanotest_NanoTestRunner.error = function(message,position) {
-};
-nanotest_NanoTestRunner.warning = function(message,position) {
-	haxe_unit_TestRunner.print(nanotest_NanoTestRunner.fileFromPosInfos(position) + ":" + position.lineNumber + ": " + message + "\n");
-};
-nanotest_NanoTestRunner.fileFromPosInfos = function(posInfos) {
-	if(posInfos.className == null) return posInfos.fileName;
-	if(posInfos.fileName == null) return null;
-	var fsegs = new EReg("\\\\|/","").split(posInfos.fileName);
-	if(fsegs.length > 1) return posInfos.fileName;
-	var f = fsegs.pop();
-	if(HxOverrides.substr(f,f.length - 3,null) != ".hx") return posInfos.fileName;
-	var segs = posInfos.className.split(".");
-	segs.pop();
-	segs.push(f);
-	return segs.join("/");
-};
-nanotest_NanoTestRunner.posInfosToPosition = function(posInfos) {
-	return { file : posInfos.fileName, min : 0, max : 0};
-};
-nanotest_NanoTestRunner.prototype = {
-	cases: null
-	,printError: null
-	,print: function(d) {
-		haxe_unit_TestRunner.print(d);
+	,errorThen: function(f) {
+		this._errorMap = f;
+		return this;
 	}
-	,add: function(testCase) {
-		this.cases.push(testCase);
+	,isResolved: function() {
+		return this._resolved;
 	}
-	,run: function() {
-		var results = [];
-		var _g = 0;
-		var _g1 = this.cases;
-		while(_g < _g1.length) {
-			var c = _g1[_g];
-			++_g;
-			var rs = c.run($bind(this,this.print));
-			var _g2 = 0;
-			while(_g2 < rs.length) {
-				var r = rs[_g2];
-				++_g2;
-				results.push(r);
-			}
-		}
-		var failures = 0;
-		var _g3 = 0;
-		while(_g3 < results.length) {
-			var result = results[_g3];
-			++_g3;
-			if(result.failed) {
-				this.print("* " + result.className + "::" + result.method + "()\n");
-				var _g11 = 0;
-				var _g21 = result.status;
-				while(_g11 < _g21.length) {
-					var status = _g21[_g11];
-					++_g11;
-					switch(Type.enumIndex(status)) {
-					case 0:
-						break;
-					case 1:
-						var posInfos = status[3];
-						var message = status[2];
-						this.printError("Test failed : " + message,posInfos);
-						break;
-					case 2:
-						var callStack = status[3];
-						var message1 = status[2];
-						var first = true;
-						var _g31 = 0;
-						while(_g31 < callStack.length) {
-							var item = callStack[_g31];
-							++_g31;
-							var c1 = "Called from";
-							switch(Type.enumIndex(item)) {
-							case 0:
-								this.print(c1 + " : a C function\n");
-								break;
-							case 1:
-								var m = item[2];
-								this.print(c1 + " : module " + m + "\n");
-								break;
-							case 2:
-								var line = item[4];
-								var file = item[3];
-								var s = item[2];
-								var posInfos1 = { fileName : file, lineNumber : line, className : result.className, methodName : result.method};
-								if(first) {
-									this.printError("exception thrown : " + message1,posInfos1);
-									first = false;
-								} else this.printError(c1,posInfos1);
-								break;
-							case 3:
-								var meth = item[3];
-								var cname = item[2];
-								this.print(c1 + " : " + cname + "." + meth + "\n");
-								break;
-							case 4:
-								var n = item[2];
-								this.print(c1 + " : local function #" + n + "\n");
-								break;
-							}
-						}
-						if(first) this.printError("exception thrown : " + message1,result.testCase.posInfos);
-						break;
+	,isErrored: function() {
+		return this._errored;
+	}
+	,isFulfilled: function() {
+		return this._fulfilled;
+	}
+	,isPending: function() {
+		return this._pending;
+	}
+	,handleResolve: function(val) {
+		this._resolve(val);
+	}
+	,_resolve: function(val) {
+		var _g = this;
+		if(this._pending) promhx_base_EventLoop.enqueue((function(f,a1) {
+			return function() {
+				f(a1);
+			};
+		})($bind(this,this._resolve),val)); else {
+			this._resolved = true;
+			this._pending = true;
+			promhx_base_EventLoop.enqueue(function() {
+				_g._val = val;
+				var _g1 = 0;
+				var _g2 = _g._update;
+				while(_g1 < _g2.length) {
+					var up = _g2[_g1];
+					++_g1;
+					try {
+						up.linkf(val);
+					} catch( e ) {
+						haxe_CallStack.lastException = e;
+						if (e instanceof js__$Boot_HaxeError) e = e.val;
+						up.async.handleError(e);
 					}
 				}
-				this.print("\n");
-				failures++;
-			}
+				_g._fulfilled = true;
+				_g._pending = false;
+			});
 		}
-		if(failures == 0) this.print("OK "); else this.print("FAILED ");
-		this.print(results.length + " tests, " + failures + " failed, " + (results.length - failures) + " success\n");
-		return failures == 0;
 	}
-	,__class__: nanotest_NanoTestRunner
+	,handleError: function(error) {
+		this._handleError(error);
+	}
+	,_handleError: function(error) {
+		var _g = this;
+		var update_errors = function(e) {
+			if(_g._error.length > 0) {
+				var _g1 = 0;
+				var _g2 = _g._error;
+				while(_g1 < _g2.length) {
+					var ef = _g2[_g1];
+					++_g1;
+					ef(e);
+				}
+			} else if(_g._update.length > 0) {
+				var _g11 = 0;
+				var _g21 = _g._update;
+				while(_g11 < _g21.length) {
+					var up = _g21[_g11];
+					++_g11;
+					up.async.handleError(e);
+				}
+			} else {
+				haxe_Log.trace("Call Stack: " + haxe_CallStack.toString(haxe_CallStack.callStack()),{ fileName : "AsyncBase.hx", lineNumber : 155, className : "promhx.base.AsyncBase", methodName : "_handleError"});
+				throw new js__$Boot_HaxeError(e);
+			}
+			_g._errorPending = false;
+		};
+		if(!this._errorPending) {
+			this._errorPending = true;
+			this._errored = true;
+			this._errorVal = error;
+			promhx_base_EventLoop.enqueue(function() {
+				if(_g._errorMap != null) try {
+					_g._resolve(_g._errorMap(error));
+				} catch( e1 ) {
+					haxe_CallStack.lastException = e1;
+					if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
+					update_errors(e1);
+				} else update_errors(error);
+			});
+		}
+	}
+	,then: function(f) {
+		var ret = new promhx_base_AsyncBase();
+		promhx_base_AsyncBase.link(this,ret,f);
+		return ret;
+	}
+	,unlink: function(to) {
+		var _g = this;
+		promhx_base_EventLoop.enqueue(function() {
+			_g._update = _g._update.filter(function(x) {
+				return x.async != to;
+			});
+		});
+	}
+	,isLinked: function(to) {
+		var updated = false;
+		var _g = 0;
+		var _g1 = this._update;
+		while(_g < _g1.length) {
+			var u = _g1[_g];
+			++_g;
+			if(u.async == to) return true;
+		}
+		return updated;
+	}
+	,__class__: promhx_base_AsyncBase
 };
-var nanotest_NanoTestStatus = { __ename__ : ["nanotest","NanoTestStatus"], __constructs__ : ["SUCCESS","FAIL","ERROR"] };
-nanotest_NanoTestStatus.SUCCESS = function(posInfos) { var $x = ["SUCCESS",0,posInfos]; $x.__enum__ = nanotest_NanoTestStatus; $x.toString = $estr; return $x; };
-nanotest_NanoTestStatus.FAIL = function(message,posInfos) { var $x = ["FAIL",1,message,posInfos]; $x.__enum__ = nanotest_NanoTestStatus; $x.toString = $estr; return $x; };
-nanotest_NanoTestStatus.ERROR = function(message,callStack) { var $x = ["ERROR",2,message,callStack]; $x.__enum__ = nanotest_NanoTestStatus; $x.toString = $estr; return $x; };
+var promhx_Deferred = $hx_exports.promhx.Deferred = function() {
+	promhx_base_AsyncBase.call(this);
+};
+promhx_Deferred.__name__ = ["promhx","Deferred"];
+promhx_Deferred.__super__ = promhx_base_AsyncBase;
+promhx_Deferred.prototype = $extend(promhx_base_AsyncBase.prototype,{
+	resolve: function(val) {
+		this.handleResolve(val);
+	}
+	,throwError: function(e) {
+		this.handleError(e);
+	}
+	,promise: function() {
+		return new promhx_Promise(this);
+	}
+	,stream: function() {
+		return new promhx_Stream(this);
+	}
+	,publicStream: function() {
+		return new promhx_PublicStream(this);
+	}
+	,__class__: promhx_Deferred
+});
+var promhx_Promise = $hx_exports.promhx.Promise = function(d) {
+	promhx_base_AsyncBase.call(this,d);
+	this._rejected = false;
+};
+promhx_Promise.__name__ = ["promhx","Promise"];
+promhx_Promise.whenAll = function(itb) {
+	var ret = new promhx_Promise();
+	promhx_base_AsyncBase.linkAll(itb,ret);
+	return ret;
+};
+promhx_Promise.promise = function(_val) {
+	var ret = new promhx_Promise();
+	ret.handleResolve(_val);
+	return ret;
+};
+promhx_Promise.__super__ = promhx_base_AsyncBase;
+promhx_Promise.prototype = $extend(promhx_base_AsyncBase.prototype,{
+	_rejected: null
+	,isRejected: function() {
+		return this._rejected;
+	}
+	,reject: function(e) {
+		this._rejected = true;
+		this.handleError(e);
+	}
+	,handleResolve: function(val) {
+		if(this._resolved) {
+			var msg = "Promise has already been resolved";
+			throw new js__$Boot_HaxeError(promhx_error_PromiseError.AlreadyResolved(msg));
+		}
+		this._resolve(val);
+	}
+	,then: function(f) {
+		var ret = new promhx_Promise();
+		promhx_base_AsyncBase.link(this,ret,f);
+		return ret;
+	}
+	,unlink: function(to) {
+		var _g = this;
+		promhx_base_EventLoop.enqueue(function() {
+			if(!_g.isFulfilled()) {
+				var msg = "Downstream Promise is not fullfilled";
+				_g.handleError(promhx_error_PromiseError.DownstreamNotFullfilled(msg));
+			} else _g._update = _g._update.filter(function(x) {
+				return x.async != to;
+			});
+		});
+	}
+	,handleError: function(error) {
+		this._rejected = true;
+		this._handleError(error);
+	}
+	,pipe: function(f) {
+		var ret = new promhx_Promise();
+		promhx_base_AsyncBase.pipeLink(this,ret,f);
+		return ret;
+	}
+	,errorPipe: function(f) {
+		var ret = new promhx_Promise();
+		this.catchError(function(e) {
+			var piped = f(e);
+			piped.then($bind(ret,ret._resolve));
+		});
+		this.then($bind(ret,ret._resolve));
+		return ret;
+	}
+	,__class__: promhx_Promise
+});
+var promhx_Stream = $hx_exports.promhx.Stream = function(d) {
+	promhx_base_AsyncBase.call(this,d);
+	this._end_deferred = new promhx_Deferred();
+	this._end_promise = this._end_deferred.promise();
+};
+promhx_Stream.__name__ = ["promhx","Stream"];
+promhx_Stream.foreach = function(itb) {
+	var s = new promhx_Stream();
+	var $it0 = $iterator(itb)();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		s.handleResolve(i);
+	}
+	s.end();
+	return s;
+};
+promhx_Stream.wheneverAll = function(itb) {
+	var ret = new promhx_Stream();
+	promhx_base_AsyncBase.linkAll(itb,ret);
+	return ret;
+};
+promhx_Stream.concatAll = function(itb) {
+	var ret = new promhx_Stream();
+	var $it0 = $iterator(itb)();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		ret.concat(i);
+	}
+	return ret;
+};
+promhx_Stream.mergeAll = function(itb) {
+	var ret = new promhx_Stream();
+	var $it0 = $iterator(itb)();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		ret.merge(i);
+	}
+	return ret;
+};
+promhx_Stream.stream = function(_val) {
+	var ret = new promhx_Stream();
+	ret.handleResolve(_val);
+	return ret;
+};
+promhx_Stream.__super__ = promhx_base_AsyncBase;
+promhx_Stream.prototype = $extend(promhx_base_AsyncBase.prototype,{
+	deferred: null
+	,_pause: null
+	,_end: null
+	,_end_promise: null
+	,_end_deferred: null
+	,then: function(f) {
+		var ret = new promhx_Stream();
+		promhx_base_AsyncBase.link(this,ret,f);
+		this._end_promise.then(function(x) {
+			ret.end();
+		});
+		return ret;
+	}
+	,detachStream: function(str) {
+		var filtered = [];
+		var removed = false;
+		var _g = 0;
+		var _g1 = this._update;
+		while(_g < _g1.length) {
+			var u = _g1[_g];
+			++_g;
+			if(u.async == str) removed = true; else filtered.push(u);
+		}
+		this._update = filtered;
+		return removed;
+	}
+	,first: function() {
+		var s = new promhx_Promise();
+		this.then(function(x) {
+			if(!s.isResolved()) s.handleResolve(x);
+		});
+		return s;
+	}
+	,handleResolve: function(val) {
+		if(!this._end && !this._pause) this._resolve(val);
+	}
+	,pause: function(set) {
+		if(set == null) set = !this._pause;
+		this._pause = set;
+	}
+	,pipe: function(f) {
+		var ret = new promhx_Stream();
+		promhx_base_AsyncBase.pipeLink(this,ret,f);
+		this._end_promise.then(function(x) {
+			ret.end();
+		});
+		return ret;
+	}
+	,errorPipe: function(f) {
+		var ret = new promhx_Stream();
+		this.catchError(function(e) {
+			var piped = f(e);
+			piped.then($bind(ret,ret._resolve));
+			piped._end_promise.then(($_=ret._end_promise,$bind($_,$_._resolve)));
+		});
+		this.then($bind(ret,ret._resolve));
+		this._end_promise.then(function(x) {
+			ret.end();
+		});
+		return ret;
+	}
+	,handleEnd: function() {
+		if(this.isPending()) promhx_base_EventLoop.enqueue($bind(this,this.handleEnd)); else if(this._end_promise.isResolved()) return; else {
+			this._end = true;
+			var o;
+			if(this.isResolved()) o = haxe_ds_Option.Some(this._val); else o = haxe_ds_Option.None;
+			this._end_promise.handleResolve(o);
+			this._update = [];
+			this._error = [];
+		}
+	}
+	,end: function() {
+		promhx_base_EventLoop.enqueue($bind(this,this.handleEnd));
+		return this;
+	}
+	,endThen: function(f) {
+		return this._end_promise.then(f);
+	}
+	,filter: function(f) {
+		var ret = new promhx_Stream();
+		this._update.push({ async : ret, linkf : function(x) {
+			if(f(x)) ret.handleResolve(x);
+		}});
+		promhx_base_AsyncBase.immediateLinkUpdate(this,ret,function(x1) {
+			return x1;
+		});
+		return ret;
+	}
+	,concat: function(s) {
+		var ret = new promhx_Stream();
+		this._update.push({ async : ret, linkf : $bind(ret,ret.handleResolve)});
+		promhx_base_AsyncBase.immediateLinkUpdate(this,ret,function(x) {
+			return x;
+		});
+		this.endThen(function(_) {
+			s.pipe(function(x1) {
+				ret.handleResolve(x1);
+				return ret;
+			});
+			s.endThen(function(_1) {
+				ret.end();
+			});
+		});
+		return ret;
+	}
+	,merge: function(s) {
+		var ret = new promhx_Stream();
+		this._update.push({ async : ret, linkf : $bind(ret,ret.handleResolve)});
+		s._update.push({ async : ret, linkf : $bind(ret,ret.handleResolve)});
+		promhx_base_AsyncBase.immediateLinkUpdate(this,ret,function(x) {
+			return x;
+		});
+		promhx_base_AsyncBase.immediateLinkUpdate(s,ret,function(x1) {
+			return x1;
+		});
+		return ret;
+	}
+	,__class__: promhx_Stream
+});
+var promhx_PublicStream = $hx_exports.promhx.PublicStream = function(def) {
+	promhx_Stream.call(this,def);
+};
+promhx_PublicStream.__name__ = ["promhx","PublicStream"];
+promhx_PublicStream.publicstream = function(val) {
+	var ps = new promhx_PublicStream();
+	ps.resolve(val);
+	return ps;
+};
+promhx_PublicStream.__super__ = promhx_Stream;
+promhx_PublicStream.prototype = $extend(promhx_Stream.prototype,{
+	resolve: function(val) {
+		this.handleResolve(val);
+	}
+	,throwError: function(e) {
+		this.handleError(e);
+	}
+	,update: function(val) {
+		this.handleResolve(val);
+	}
+	,__class__: promhx_PublicStream
+});
+var promhx_base_EventLoop = function() { };
+promhx_base_EventLoop.__name__ = ["promhx","base","EventLoop"];
+promhx_base_EventLoop.enqueue = function(eqf) {
+	promhx_base_EventLoop.queue.add(eqf);
+	promhx_base_EventLoop.continueOnNextLoop();
+};
+promhx_base_EventLoop.set_nextLoop = function(f) {
+	if(promhx_base_EventLoop.nextLoop != null) throw new js__$Boot_HaxeError("nextLoop has already been set"); else promhx_base_EventLoop.nextLoop = f;
+	return promhx_base_EventLoop.nextLoop;
+};
+promhx_base_EventLoop.queueEmpty = function() {
+	return promhx_base_EventLoop.queue.isEmpty();
+};
+promhx_base_EventLoop.finish = function(max_iterations) {
+	if(max_iterations == null) max_iterations = 1000;
+	var fn = null;
+	while(max_iterations-- > 0 && (fn = promhx_base_EventLoop.queue.pop()) != null) fn();
+	return promhx_base_EventLoop.queueEmpty();
+};
+promhx_base_EventLoop.clear = function() {
+	promhx_base_EventLoop.queue = new List();
+};
+promhx_base_EventLoop.f = function() {
+	var fn = promhx_base_EventLoop.queue.pop();
+	if(fn != null) fn();
+	if(!promhx_base_EventLoop.queueEmpty()) promhx_base_EventLoop.continueOnNextLoop();
+};
+promhx_base_EventLoop.continueOnNextLoop = function() {
+	if(promhx_base_EventLoop.nextLoop != null) promhx_base_EventLoop.nextLoop(promhx_base_EventLoop.f); else setImmediate(promhx_base_EventLoop.f);
+};
+var promhx_error_PromiseError = { __ename__ : ["promhx","error","PromiseError"], __constructs__ : ["AlreadyResolved","DownstreamNotFullfilled"] };
+promhx_error_PromiseError.AlreadyResolved = function(message) { var $x = ["AlreadyResolved",0,message]; $x.__enum__ = promhx_error_PromiseError; $x.toString = $estr; return $x; };
+promhx_error_PromiseError.DownstreamNotFullfilled = function(message) { var $x = ["DownstreamNotFullfilled",1,message]; $x.__enum__ = promhx_error_PromiseError; $x.toString = $estr; return $x; };
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = ["thx","Arrays"];
 thx_Arrays.after = function(array,element) {
@@ -3125,10 +4352,11 @@ var __map_reserved = {}
         };
       }
     ;
-nanotest_NanoTestCase.ASSERT_TRUE_ERROR = "expected true but was false";
-nanotest_NanoTestCase.ASSERT_FALSE_ERROR = "expected false but was true";
-nanotest_NanoTestCase.ASSERT_THROWS_ERROR = "expected to throw exception but didn't";
+buddy_BuddySuite.exclude = "exclude";
+buddy_BuddySuite.include = "include";
 js_Boot.__toStr = {}.toString;
+promhx_base_AsyncBase.id_ctr = 0;
+promhx_base_EventLoop.queue = new List();
 thx_Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
 thx_Ints.BASE = "0123456789abcdefghijklmnopqrstuvwxyz";
 thx_Strings.UCWORDS = new EReg("[^a-zA-Z]([a-z])","g");

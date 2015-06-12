@@ -25,11 +25,18 @@ class DynamicTools {
 }
 
 
-class ProcessManifest {
+@:tink class ProcessManifest {
+
+
 
 
   static inline function processManifest(paths:Paths) {
-    return [ for (path in paths) path.getType() ];
+    return [ for (path in paths)
+      switch (path.getType()) {
+        case http(path):path;
+        case file(path):path;
+        case _:null;
+      }];
   }
 
   static inline function traverseJson(json:haxe.DynamicAccess<Dynamic>) {
@@ -39,7 +46,6 @@ class ProcessManifest {
       else if (obj.isJsObject()) traverseJson(obj);
     }
 
-    json.pretty();
     return json;
 
   }
@@ -47,10 +53,11 @@ class ProcessManifest {
   public static inline function map_manifest(file:File,cb) {
     var json = file.toJson();
     traverseJson(json);
-
+    file.setContent(haxe.Json.stringify(json));
     cb(null,file);
   };
-  public static inline function task(options:Dynamic) {
+
+  public static inline function task(?options) {
     return EventStream.map(map_manifest);
   }
 }
