@@ -222,7 +222,7 @@ md5.__name__ = ["md5"];
 md5.map_file = function(file,cb) {
 	FileTools.toMd5(file);
 	var p = Pretty();
-	console.log(p);
+	haxe_Log.trace(p,{ fileName : "Md5.hx", lineNumber : 13, className : "Md5", methodName : "map_file"});
 	cb(null,file);
 };
 md5.task = function(options) {
@@ -239,7 +239,17 @@ DynamicTools.isJsObject = function(a) {
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = ["manifest"];
 manifest.processFile = function(path,__return) {
-	__return(path);
+	(function(__afterVar_0) {
+		js_node_Fs.readFile(path,{ encoding : "utf8"},function(__parameter_1,__parameter_2) {
+			__afterVar_0(__parameter_1,__parameter_2);
+		});
+	})(function(y,w) {
+		y;
+		w;
+		haxe_Log.trace("w",{ fileName : "ProcessManifest.hx", lineNumber : 35, className : "ProcessManifest", methodName : "processFile", customParams : [w]});
+		haxe_Log.trace("y",{ fileName : "ProcessManifest.hx", lineNumber : 36, className : "ProcessManifest", methodName : "processFile", customParams : [y]});
+		__return(path);
+	});
 };
 manifest.processManifest = function(paths,__return) {
 	var __iterator = 0;
@@ -272,9 +282,9 @@ manifest.processManifest = function(paths,__return) {
 				case 1:
 					var path2 = _g[2];
 					manifest.processFile(path2,(function(__endSwitch_0) {
-						return function(__parameter_0) {
-							__parameter_0;
-							__endSwitch_0[0](__parameter_0);
+						return function(__parameter_3) {
+							__parameter_3;
+							__endSwitch_0[0](__parameter_3);
 						};
 					})(__endSwitch_0));
 					break;
@@ -290,53 +300,53 @@ manifest.processManifest = function(paths,__return) {
 manifest.traverseJson = function(json,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
-	var __break_2 = function() {
+	var __break_5 = function() {
 		__return(json);
 	};
-	var __continue_1;
-	var __continue_11 = null;
-	__continue_11 = function() {
+	var __continue_4;
+	var __continue_41 = null;
+	__continue_41 = function() {
 		var __do = function() {
 			var __break = function() {
-				__break_2();
+				__break_5();
 			};
 			var __continue = function() {
-				__continue_11();
+				__continue_41();
 			};
 			if(__doCount++ == 0) do (function(key) {
 				key;
 				(function(obj) {
 					obj;
 					var __endIf_1 = function() {
-						__continue_11();
+						__continue_41();
 						return;
 					};
-					if(DynamicTools.isJsArray(obj)) (function(__afterVar_6) {
-						manifest.processManifest(obj,function(__parameter_7) {
-							__afterVar_6(__parameter_7);
+					if(DynamicTools.isJsArray(obj)) (function(__afterVar_9) {
+						manifest.processManifest(obj,function(__parameter_10) {
+							__afterVar_9(__parameter_10);
 						});
 					})(function(new_obj) {
 						new_obj;
 						json[key] = new_obj;
 						__endIf_1();
-					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,function(__parameter_5) {
-						__parameter_5;
+					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,function(__parameter_8) {
+						__parameter_8;
 						__endIf_1();
 					}); else __endIf_1();
 				})(json[key]);
 			})(Reflect.fields(json)[__iterator++]); while(--__doCount != 0);
 		};
-		if(__iterator < Reflect.fields(json).length) __do(); else __break_2();
+		if(__iterator < Reflect.fields(json).length) __do(); else __break_5();
 	};
-	__continue_1 = __continue_11;
-	__continue_1();
+	__continue_4 = __continue_41;
+	__continue_4();
 };
 manifest.map_manifest = function(file,cb) {
 	var asyncTest = function(__return) {
 		(function(json) {
 			json;
-			manifest.traverseJson(json,function(__parameter_9) {
-				json = __parameter_9;
+			manifest.traverseJson(json,function(__parameter_12) {
+				json = __parameter_12;
 				FileTools.setContent(file,JSON.stringify(json));
 				cb(null,file);
 				__return();
@@ -692,6 +702,11 @@ haxe_IMap.prototype = {
 	,keys: null
 	,__class__: haxe_IMap
 };
+var haxe_Log = function() { };
+haxe_Log.__name__ = ["haxe","Log"];
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
+};
 var haxe_ds_StringMap = function() {
 	this.h = { };
 };
@@ -757,6 +772,25 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = ["js","Boot"];
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg;
+	if(i != null) msg = i.fileName + ":" + i.lineNumber + ": "; else msg = "";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js_Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
+};
 js_Boot.isClass = function(o) {
 	return o.__name__;
 };
@@ -897,6 +931,7 @@ js_Boot.__resolveNativeClass = function(name) {
 	return (Function("return typeof " + name + " != \"undefined\" ? " + name + " : null"))();
 };
 var js_node_Crypto = require("crypto");
+var js_node_Fs = require("fs");
 var js_node_buffer_Buffer = require("buffer").Buffer;
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = ["thx","Arrays"];

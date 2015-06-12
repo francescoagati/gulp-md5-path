@@ -40,7 +40,7 @@ md5.map_file = function(file,cb) {
 	var basename = end.split(".");
 	file.path = "" + splits.slice(0,-1).join("/") + "/" + basename[0] + "-" + md5_suffix + "." + basename.slice(1).join(".");
 	var p = Pretty();
-	console.log(p);
+	haxe_Log.trace(p,{ fileName : "Md5.hx", lineNumber : 13, className : "Md5", methodName : "map_file"});
 	cb(null,file);
 };
 md5.task = function(options) {
@@ -49,7 +49,14 @@ md5.task = function(options) {
 var manifest = $hx_exports.manifest = function() { };
 manifest.__name__ = true;
 manifest.processFile = function(path,__return) {
-	__return(path);
+	var __afterVar_0 = function(y,w) {
+		haxe_Log.trace("w",{ fileName : "ProcessManifest.hx", lineNumber : 35, className : "ProcessManifest", methodName : "processFile", customParams : [w]});
+		haxe_Log.trace("y",{ fileName : "ProcessManifest.hx", lineNumber : 36, className : "ProcessManifest", methodName : "processFile", customParams : [y]});
+		__return(path);
+	};
+	js_node_Fs.readFile(path,{ encoding : "utf8"},function(__parameter_1,__parameter_2) {
+		__afterVar_0(__parameter_1,__parameter_2);
+	});
 };
 manifest.processManifest = function(paths,__return) {
 	var __iterator = 0;
@@ -62,23 +69,39 @@ manifest.processManifest = function(paths,__return) {
 		};
 		while(true) {
 			var path = paths[__iterator++];
-			var __index = __i;
+			var __index = [__i];
 			__counter++;
 			{
 				var _g = StringTools.startsWith(path,"http")?TypePath.http(path):StringTools.startsWith(path,".//")?TypePath.file(path):TypePath.undefined(path);
 				switch(_g[1]) {
 				case 0:
 					var path1 = _g[2];
-					__results[__index] = path1;
+					__results[__index[0]] = path1;
 					__checkCounter();
 					break;
 				case 1:
-					var path2 = _g[2];
-					__results[__index] = path2;
-					__checkCounter();
+					var path2 = [_g[2]];
+					var __return1 = [(function(__index) {
+						return function(__parameter_3) {
+							__results[__index[0]] = __parameter_3;
+							__checkCounter();
+						};
+					})(__index)];
+					var __afterVar_0 = [(function(__return1,path2) {
+						return function(y,w) {
+							haxe_Log.trace("w",{ fileName : "ProcessManifest.hx", lineNumber : 35, className : "ProcessManifest", methodName : "processFile", customParams : [w]});
+							haxe_Log.trace("y",{ fileName : "ProcessManifest.hx", lineNumber : 36, className : "ProcessManifest", methodName : "processFile", customParams : [y]});
+							__return1[0](path2[0]);
+						};
+					})(__return1,path2)];
+					js_node_Fs.readFile(path2[0],{ encoding : "utf8"},(function(__afterVar_0) {
+						return function(__parameter_1,__parameter_2) {
+							__afterVar_0[0](__parameter_1,__parameter_2);
+						};
+					})(__afterVar_0));
 					break;
 				default:
-					__results[__index] = null;
+					__results[__index[0]] = null;
 					__checkCounter();
 				}
 			}
@@ -92,8 +115,8 @@ manifest.traverseJson = function(json,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
 	var tmp;
-	var __continue_11 = null;
-	__continue_11 = function() {
+	var __continue_41 = null;
+	__continue_41 = function() {
 		if(__iterator < Reflect.fields(json).length) {
 			if(__doCount++ == 0) while(true) {
 				var key = [Reflect.fields(json)[__iterator++]];
@@ -102,12 +125,12 @@ manifest.traverseJson = function(json,__return) {
 				obj;
 				var __endIf_1 = [(function() {
 					return function() {
-						__continue_11();
+						__continue_41();
 						return;
 					};
 				})()];
 				if(toString.call(o) === "[object Array]") {
-					var __afterVar_6 = [(function(__endIf_1,key) {
+					var __afterVar_9 = [(function(__endIf_1,key) {
 						return function(new_obj) {
 							new_obj;
 							json[key[0]] = new_obj;
@@ -115,24 +138,24 @@ manifest.traverseJson = function(json,__return) {
 						};
 					})(__endIf_1,key)];
 					var paths = obj;
-					var __return1 = [(function(__afterVar_6) {
-						return function(__parameter_7) {
-							__afterVar_6[0](__parameter_7);
+					var __return1 = [(function(__afterVar_9) {
+						return function(__parameter_10) {
+							__afterVar_9[0](__parameter_10);
 						};
-					})(__afterVar_6)];
+					})(__afterVar_9)];
 					var __iterator1 = 0;
 					if(__iterator1 < paths.length) {
 						var __results = [[]];
 						var __counter = [1];
 						var __i = 0;
-						var __checkCounter = (function(__counter,__results,__return1) {
+						var __checkCounter = [(function(__counter,__results,__return1) {
 							return function() {
 								if(--__counter[0] == 0) __return1[0](__results[0]);
 							};
-						})(__counter,__results,__return1);
+						})(__counter,__results,__return1)];
 						while(true) {
 							var path = paths[__iterator1++];
-							var __index = __i;
+							var __index = [__i];
 							__counter[0]++;
 							{
 								var _g = StringTools.startsWith(path,"http")?TypePath.http(path):StringTools.startsWith(path,".//")?TypePath.file(path):TypePath.undefined(path);
@@ -140,28 +163,47 @@ manifest.traverseJson = function(json,__return) {
 								case 0:
 									var path1 = _g[2];
 									path1;
-									__results[0][__index] = path1;
-									__checkCounter();
+									__results[0][__index[0]] = path1;
+									__checkCounter[0]();
 									break;
 								case 1:
 									var path2 = _g[2];
-									path2;
-									__results[0][__index] = path2;
-									__checkCounter();
+									var path3 = [path2];
+									var __return2 = [(function(__index,__checkCounter,__results) {
+										return function(__parameter_3) {
+											__parameter_3;
+											__results[0][__index[0]] = __parameter_3;
+											__checkCounter[0]();
+										};
+									})(__index,__checkCounter,__results)];
+									var __afterVar_0 = [(function(__return2,path3) {
+										return function(y,w) {
+											y;
+											w;
+											haxe_Log.trace("w",{ fileName : "ProcessManifest.hx", lineNumber : 35, className : "ProcessManifest", methodName : "processFile", customParams : [w]});
+											haxe_Log.trace("y",{ fileName : "ProcessManifest.hx", lineNumber : 36, className : "ProcessManifest", methodName : "processFile", customParams : [y]});
+											__return2[0](path3[0]);
+										};
+									})(__return2,path3)];
+									js_node_Fs.readFile(path3[0],{ encoding : "utf8"},(function(__afterVar_0) {
+										return function(__parameter_1,__parameter_2) {
+											__afterVar_0[0](__parameter_1,__parameter_2);
+										};
+									})(__afterVar_0));
 									break;
 								default:
-									__results[0][__index] = null;
-									__checkCounter();
+									__results[0][__index[0]] = null;
+									__checkCounter[0]();
 								}
 							}
 							__i++;
 							if(!(__iterator1 < paths.length)) break;
 						}
-						__checkCounter();
+						__checkCounter[0]();
 					}
 				} else if((!!a) && (a.constructor === Object)) manifest.traverseJson(obj,(function(__endIf_1) {
-					return function(__parameter_5) {
-						__parameter_5;
+					return function(__parameter_8) {
+						__parameter_8;
 						__endIf_1[0]();
 					};
 				})(__endIf_1)); else __endIf_1[0]();
@@ -169,17 +211,17 @@ manifest.traverseJson = function(json,__return) {
 			}
 		} else __return(json);
 	};
-	tmp = __continue_11;
-	var __continue_1 = tmp;
-	__continue_1();
+	tmp = __continue_41;
+	var __continue_4 = tmp;
+	__continue_4();
 };
 manifest.map_manifest = function(file,cb) {
 	var asyncTest = function(__return) {
 		var json = JSON.parse(file.contents.toString());
 		json;
 		var json1 = json;
-		var __return1 = function(__parameter_9) {
-			json = __parameter_9;
+		var __return1 = function(__parameter_12) {
+			json = __parameter_12;
 			var content = JSON.stringify(json);
 			file.contents = new js_node_buffer_Buffer(content);
 			cb(null,file);
@@ -188,8 +230,8 @@ manifest.map_manifest = function(file,cb) {
 		var __iterator = 0;
 		var __doCount = 0;
 		var tmp;
-		var __continue_11 = null;
-		__continue_11 = function() {
+		var __continue_41 = null;
+		__continue_41 = function() {
 			if(__iterator < Reflect.fields(json1).length) {
 				if(__doCount++ == 0) while(true) {
 					var key = [Reflect.fields(json1)[__iterator++]];
@@ -198,12 +240,12 @@ manifest.map_manifest = function(file,cb) {
 					obj;
 					var __endIf_1 = [(function() {
 						return function() {
-							__continue_11();
+							__continue_41();
 							return;
 						};
 					})()];
 					if(toString.call(o) === "[object Array]") {
-						var __afterVar_6 = [(function(__endIf_1,key) {
+						var __afterVar_9 = [(function(__endIf_1,key) {
 							return function(new_obj) {
 								new_obj;
 								json1[key[0]] = new_obj;
@@ -211,24 +253,24 @@ manifest.map_manifest = function(file,cb) {
 							};
 						})(__endIf_1,key)];
 						var paths = obj;
-						var __return2 = [(function(__afterVar_6) {
-							return function(__parameter_7) {
-								__afterVar_6[0](__parameter_7);
+						var __return2 = [(function(__afterVar_9) {
+							return function(__parameter_10) {
+								__afterVar_9[0](__parameter_10);
 							};
-						})(__afterVar_6)];
+						})(__afterVar_9)];
 						var __iterator1 = 0;
 						if(__iterator1 < paths.length) {
 							var __results = [[]];
 							var __counter = [1];
 							var __i = 0;
-							var __checkCounter = (function(__counter,__results,__return2) {
+							var __checkCounter = [(function(__counter,__results,__return2) {
 								return function() {
 									if(--__counter[0] == 0) __return2[0](__results[0]);
 								};
-							})(__counter,__results,__return2);
+							})(__counter,__results,__return2)];
 							while(true) {
 								var path = paths[__iterator1++];
-								var __index = __i;
+								var __index = [__i];
 								__counter[0]++;
 								{
 									var _g = StringTools.startsWith(path,"http")?TypePath.http(path):StringTools.startsWith(path,".//")?TypePath.file(path):TypePath.undefined(path);
@@ -236,28 +278,47 @@ manifest.map_manifest = function(file,cb) {
 									case 0:
 										var path1 = _g[2];
 										path1;
-										__results[0][__index] = path1;
-										__checkCounter();
+										__results[0][__index[0]] = path1;
+										__checkCounter[0]();
 										break;
 									case 1:
 										var path2 = _g[2];
-										path2;
-										__results[0][__index] = path2;
-										__checkCounter();
+										var path3 = [path2];
+										var __return3 = [(function(__index,__checkCounter,__results) {
+											return function(__parameter_3) {
+												__parameter_3;
+												__results[0][__index[0]] = __parameter_3;
+												__checkCounter[0]();
+											};
+										})(__index,__checkCounter,__results)];
+										var __afterVar_0 = [(function(__return3,path3) {
+											return function(y,w) {
+												y;
+												w;
+												haxe_Log.trace("w",{ fileName : "ProcessManifest.hx", lineNumber : 35, className : "ProcessManifest", methodName : "processFile", customParams : [w]});
+												haxe_Log.trace("y",{ fileName : "ProcessManifest.hx", lineNumber : 36, className : "ProcessManifest", methodName : "processFile", customParams : [y]});
+												__return3[0](path3[0]);
+											};
+										})(__return3,path3)];
+										js_node_Fs.readFile(path3[0],{ encoding : "utf8"},(function(__afterVar_0) {
+											return function(__parameter_1,__parameter_2) {
+												__afterVar_0[0](__parameter_1,__parameter_2);
+											};
+										})(__afterVar_0));
 										break;
 									default:
-										__results[0][__index] = null;
-										__checkCounter();
+										__results[0][__index[0]] = null;
+										__checkCounter[0]();
 									}
 								}
 								__i++;
 								if(!(__iterator1 < paths.length)) break;
 							}
-							__checkCounter();
+							__checkCounter[0]();
 						}
 					} else if((!!a) && (a.constructor === Object)) manifest.traverseJson(obj,(function(__endIf_1) {
-						return function(__parameter_5) {
-							__parameter_5;
+						return function(__parameter_8) {
+							__parameter_8;
 							__endIf_1[0]();
 						};
 					})(__endIf_1)); else __endIf_1[0]();
@@ -265,9 +326,9 @@ manifest.map_manifest = function(file,cb) {
 				}
 			} else __return1(json1);
 		};
-		tmp = __continue_11;
-		var __continue_1 = tmp;
-		__continue_1();
+		tmp = __continue_41;
+		var __continue_4 = tmp;
+		__continue_4();
 	};
 	asyncTest(function() {
 	});
@@ -292,8 +353,31 @@ StringTools.__name__ = true;
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
 };
+var haxe_Log = function() { };
+haxe_Log.__name__ = true;
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
+};
 var js_Boot = function() { };
 js_Boot.__name__ = true;
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg = i != null?i.fileName + ":" + i.lineNumber + ": ":"";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js_Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
+};
 js_Boot.__string_rec = function(o,s) {
 	if(o == null) return "null";
 	if(s.length >= 5) return "<...>";
@@ -362,6 +446,7 @@ js_Boot.__string_rec = function(o,s) {
 	}
 };
 var js_node_Crypto = require("crypto");
+var js_node_Fs = require("fs");
 var js_node_buffer_Buffer = require("buffer").Buffer;
 String.__name__ = true;
 Array.__name__ = true;

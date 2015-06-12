@@ -5,7 +5,7 @@ import Externs;
 import js.node.Buffer;
 import Manifest;
 
-
+import js.Node;
 
 using FileTools;
 using thx.Arrays;
@@ -45,11 +45,14 @@ class Tests extends BuddySuite {
 
         before(function(done) {
 
+          var path = '${Node.__dirname}/../test/files';
+
           var file = ('./test/manifest.json':Path).toVynil();
-          ProcessManifest.map_manifest(file,function(_,file) {
+          ProcessManifest.map_manifest({basePath:path},file,function(_,file) {
             fileResult = file;
             done();
           });
+
 
 
         });

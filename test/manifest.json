@@ -4,12 +4,12 @@
   "c":[
     "wejfwefweofwejfiwefwieofwfiewi",
     ".//folderA/ember.min.js",
-    ".//folderA/jQuery.min.js",
+    ".//folderA/jquery.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/AdapterRegistry.js.uncompressed.js",
     "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/DeferredList.js",
     "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/_firebug/firebug.css",
-    ".//folderA/jQuery.min.js",
-    ".//folderA/jQuery.min.js",
+    ".//folderA/jquery.min.js",
+    ".//folderA/jquery.min.js",
     ".//folderB/messenger.js"
   ],
   "d":{
@@ -19,12 +19,12 @@
       "h":[
         "wejfwefweofwejfiwefwieofwfiewi",
         ".//folderA/ember.min.js",
-        ".//folderA/jQuery.min.js",
+        ".//folderA/jquery.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/AdapterRegistry.js.uncompressed.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/DeferredList.js",
         "https://cdnjs.cloudflare.com/ajax/libs/dojo/1.10.4/_firebug/firebug.css",
-        ".//folderA/jQuery.min.js",
-        ".//folderA/jQuery.min.js",
+        ".//folderA/jquery.min.js",
+        ".//folderA/jquery.min.js",
         ".//folderB/messenger.js"
       ]
     }
