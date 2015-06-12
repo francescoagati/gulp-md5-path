@@ -29,15 +29,18 @@ class DynamicTools {
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
 class ProcessManifest {
 
+  @:async static inline function processFile(path:Path) {
+    return path;
+  }
+
+
 
   @:async static inline function processManifest(paths:Paths) {
     return [
       @fork(path in paths) {
         switch (path.getType()) {
           case http(path):path;
-          case file(path):
-            trace(path);
-            path;
+          case file(path): @await processFile(path);
           case _:null;
       }
     }];

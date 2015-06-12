@@ -310,17 +310,20 @@ PathTools.processPath = function(path) {
 	}
 };
 Math.__name__ = ["Math"];
-var manifest = $hx_exports.manifest = function() { };
-manifest.__name__ = ["manifest"];
-manifest.isJsArray = function(o) {
+var DynamicTools = function() { };
+DynamicTools.__name__ = ["DynamicTools"];
+DynamicTools.isJsArray = function(o) {
 	return toString.call(o) === "[object Array]";
 };
-manifest.isJsObject = function(a) {
+DynamicTools.isJsObject = function(a) {
 	return (!!a) && (a.constructor === Object);
 };
-var ProcessManifest = function() { };
-ProcessManifest.__name__ = ["ProcessManifest"];
-ProcessManifest.processManifest = function(paths,__return) {
+var manifest = $hx_exports.manifest = function() { };
+manifest.__name__ = ["manifest"];
+manifest.processFile = function(path,__return) {
+	__return(path);
+};
+manifest.processManifest = function(paths,__return) {
 	var __iterator = 0;
 	if(__iterator < paths.length) {
 		var __results = [];
@@ -333,29 +336,32 @@ ProcessManifest.processManifest = function(paths,__return) {
 			var path = paths[__iterator++];
 			var __index = [__i];
 			__counter++;
-			var __endSwitch_1 = (function(__index) {
+			var __endSwitch_1 = [(function(__index) {
 				return function(__endSwitch_1_parameter_0) {
 					__results[__index[0]] = __endSwitch_1_parameter_0;
 					__checkCounter();
 					return;
 				};
-			})(__index);
+			})(__index)];
 			{
 				var _g = PathTools.getType(path);
 				switch(Type.enumIndex(_g)) {
 				case 0:
 					var path1 = _g[2];
 					path1;
-					__endSwitch_1(path1);
+					__endSwitch_1[0](path1);
 					break;
 				case 1:
 					var path2 = _g[2];
-					haxe_Log.trace(path2,{ fileName : "ProcessManifest.hx", lineNumber : 40, className : "ProcessManifest", methodName : "processManifest"});
-					path2;
-					__endSwitch_1(path2);
+					manifest.processFile(path2,(function(__endSwitch_1) {
+						return function(__parameter_7) {
+							__parameter_7;
+							__endSwitch_1[0](__parameter_7);
+						};
+					})(__endSwitch_1));
 					break;
 				default:
-					__endSwitch_1(null);
+					__endSwitch_1[0](null);
 				}
 			}
 			__i++;
@@ -363,7 +369,7 @@ ProcessManifest.processManifest = function(paths,__return) {
 		__checkCounter();
 	}
 };
-ProcessManifest.traverseJson = function(json,__return) {
+manifest.traverseJson = function(json,__return) {
 	var __iterator = 0;
 	var __doCount = 0;
 	var __break_2 = function() {
@@ -387,15 +393,15 @@ ProcessManifest.traverseJson = function(json,__return) {
 						__continue_11();
 						return;
 					};
-					if(manifest.isJsArray(obj)) (function(__afterVar_6) {
-						ProcessManifest.processManifest(obj,function(__parameter_7) {
-							__afterVar_6(__parameter_7);
+					if(DynamicTools.isJsArray(obj)) (function(__afterVar_6) {
+						manifest.processManifest(obj,function(__parameter_8) {
+							__afterVar_6(__parameter_8);
 						});
 					})(function(new_obj) {
 						new_obj;
 						json[key] = new_obj;
 						__endIf_0();
-					}); else if(manifest.isJsObject(obj)) ProcessManifest.traverseJson(obj,function(__parameter_5) {
+					}); else if(DynamicTools.isJsObject(obj)) manifest.traverseJson(obj,function(__parameter_5) {
 						__parameter_5;
 						__endIf_0();
 					}); else __endIf_0();
@@ -407,12 +413,12 @@ ProcessManifest.traverseJson = function(json,__return) {
 	__continue_1 = __continue_11;
 	__continue_1();
 };
-ProcessManifest.map_manifest = function(file,cb) {
+manifest.map_manifest = function(file,cb) {
 	var asyncTest = function(__return) {
 		(function(json) {
 			json;
-			ProcessManifest.traverseJson(json,function(__parameter_8) {
-				json = __parameter_8;
+			manifest.traverseJson(json,function(__parameter_9) {
+				json = __parameter_9;
 				FileTools.setContent(file,JSON.stringify(json));
 				cb(null,file);
 				__return();
@@ -422,8 +428,8 @@ ProcessManifest.map_manifest = function(file,cb) {
 	asyncTest(function() {
 	});
 };
-ProcessManifest.task = function(options) {
-	return EventStream.map(ProcessManifest.map_manifest);
+manifest.task = function(options) {
+	return EventStream.map(manifest.map_manifest);
 };
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
@@ -687,7 +693,7 @@ var Tests = function() {
 		var fileResult = null;
 		_g.before(function(done,__status1) {
 			var file1 = VinylTools.toVynil("./test/manifest.json");
-			ProcessManifest.map_manifest(file1,function(_,file2) {
+			manifest.map_manifest(file1,function(_,file2) {
 				fileResult = file2;
 				done();
 			});
