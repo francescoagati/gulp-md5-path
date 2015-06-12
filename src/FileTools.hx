@@ -9,6 +9,10 @@ class FileTools {
     return file.contents.toString();
   }
 
+  public static inline function toJson(file:AFile):haxe.DynamicAccess<Dynamic> {
+    return haxe.Json.parse(file.toString());
+  }
+
   public static inline function toMd5(file:AFile):AFile {
     var md5 = Crypto.createHash('md5');
     md5.update(file.toString());

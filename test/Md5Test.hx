@@ -18,6 +18,8 @@ class Md5Test extends nanotest.NanoTestCase {
           contents: new Buffer("Hello world")
         });
 
+    
+
         sure(file.toMd5().basename == 'file-3e25960a79dbc69b674cd4ec67a72c62.coffee');
 
 

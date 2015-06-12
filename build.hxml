@@ -5,7 +5,6 @@
 -D analyzer
 -lib hxnodejs slambda thx.core jsrequire
 --macro jsrequire.JSRequire.npmInstall(true)
---no-traces
 --next
 -cp src
 -js dist/gulp-md5-path.debug.js

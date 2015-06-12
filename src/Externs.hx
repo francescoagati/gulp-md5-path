@@ -15,6 +15,12 @@ typedef File = {
 }
 
 
+@:jsRequire("pretty-print")  extern class Pretty {
+  @:selfCall public function new();
+	@:selfCall public static function pretty(opts:Dynamic,obj:Dynamic):Void;
+}
+
+
 @:jsRequire("vinyl")  extern class Vinyl {
   public function new(options:FileBase);
 }

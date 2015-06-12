@@ -1,4 +1,4 @@
-(function (console) { "use strict";
+(function (console, $hx_exports) { "use strict";
 var $estr = function() { return js_Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
@@ -80,10 +80,14 @@ _$Externs_AFile_$Impl_$._new = function(f) {
 _$Externs_AFile_$Impl_$.fromVinyl = function(v) {
 	return v;
 };
+var EventStream = require("event-stream");
 var FileTools = function() { };
 FileTools.__name__ = ["FileTools"];
 FileTools.toString = function(file) {
 	return file.contents.toString();
+};
+FileTools.toJson = function(file) {
+	return JSON.parse(FileTools.toString(file));
 };
 FileTools.toMd5 = function(file) {
 	var md5 = js_node_Crypto.createHash("md5");
@@ -136,7 +140,75 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 };
-Math.__name__ = ["Math"];
+var Lambda = function() { };
+Lambda.__name__ = ["Lambda"];
+Lambda.has = function(it,elt) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(x == elt) return true;
+	}
+	return false;
+};
+var TypePath = { __ename__ : ["TypePath"], __constructs__ : ["http","file","undefined"] };
+TypePath.http = function(path) { var $x = ["http",0,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+TypePath.file = function(path) { var $x = ["file",1,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+TypePath.undefined = function(path) { var $x = ["undefined",2,path]; $x.__enum__ = TypePath; $x.toString = $estr; return $x; };
+var _$Manifest_Path_$Impl_$ = {};
+_$Manifest_Path_$Impl_$.__name__ = ["_Manifest","Path_Impl_"];
+_$Manifest_Path_$Impl_$._new = function(s) {
+	return s;
+};
+_$Manifest_Path_$Impl_$.fromString = function(s) {
+	return s;
+};
+var _$Manifest_AManifest_$Impl_$ = {};
+_$Manifest_AManifest_$Impl_$.__name__ = ["_Manifest","AManifest_Impl_"];
+_$Manifest_AManifest_$Impl_$._new = function(m) {
+	return m;
+};
+_$Manifest_AManifest_$Impl_$.fromFile = function(file) {
+	var m = JSON.parse(FileTools.toString(file));
+	return m;
+};
+var PathTools = function() { };
+PathTools.__name__ = ["PathTools"];
+PathTools.getType = function(path) {
+	if(PathTools.isHttp(path)) return TypePath.http(path); else if(PathTools.isFile(path)) return TypePath.file(path); else return TypePath.undefined(path);
+};
+PathTools.fileName = function(path) {
+	return thx_Arrays.last(path.split("/"));
+};
+PathTools.baseName = function(path) {
+	return thx_Arrays.first(thx_Arrays.last(path.split("/")).split("."));
+};
+PathTools.basePath = function(path) {
+	return path.split("/").slice(0,-1).join("/");
+};
+PathTools.extension = function(path) {
+	return thx_Arrays.last(thx_Arrays.last(path.split("/")).split("."));
+};
+PathTools.isHttp = function(path) {
+	return StringTools.startsWith(path,"http");
+};
+PathTools.isFile = function(path) {
+	return StringTools.startsWith(path,".//");
+};
+PathTools.processPath = function(path) {
+	{
+		var _g = PathTools.getType(path);
+		switch(Type.enumIndex(_g)) {
+		case 0:
+			var path1 = _g[2];
+			return "http";
+		case 1:
+			var path2 = _g[2];
+			return "file";
+		default:
+			return null;
+		}
+	}
+};
 var nanotest_NanoTestCase = function(posInfos) {
 	this.posInfos = posInfos;
 };
@@ -261,6 +333,23 @@ nanotest_NanoTestCase.prototype = {
 	}
 	,__class__: nanotest_NanoTestCase
 };
+var ManifestTest = function(posInfos) {
+	nanotest_NanoTestCase.call(this,posInfos);
+};
+ManifestTest.__name__ = ["ManifestTest"];
+ManifestTest.__super__ = nanotest_NanoTestCase;
+ManifestTest.prototype = $extend(nanotest_NanoTestCase.prototype,{
+	testBasic: function() {
+		var file = VinylTools.toVynil("./test/manifest.json");
+		ProcessManifest.map_manifest(file,function(x,file1) {
+		});
+		var actual = 1;
+		var expected = 1;
+		if(actual != expected) throw new js__$Boot_HaxeError("FAIL: values are not equal (expected: " + expected + ", actual: " + actual + ")");
+	}
+	,__class__: ManifestTest
+});
+Math.__name__ = ["Math"];
 var Md5Test = function(posInfos) {
 	nanotest_NanoTestCase.call(this,posInfos);
 };
@@ -279,8 +368,54 @@ Md5Test.prototype = $extend(nanotest_NanoTestCase.prototype,{
 	}
 	,__class__: Md5Test
 });
+var manifest = $hx_exports.manifest = function() { };
+manifest.__name__ = ["manifest"];
+manifest.isJsArray = function(o) {
+	return toString.call(o) === "[object Array]";
+};
+manifest.isJsObject = function(a) {
+	return (!!a) && (a.constructor === Object);
+};
+var ProcessManifest = function() { };
+ProcessManifest.__name__ = ["ProcessManifest"];
+ProcessManifest.processManifest = function(paths) {
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < paths.length) {
+		var path = paths[_g1];
+		++_g1;
+		_g.push(PathTools.getType(path));
+	}
+	return _g;
+};
+ProcessManifest.traverseJson = function(json) {
+	var _g = 0;
+	var _g1 = Reflect.fields(json);
+	while(_g < _g1.length) {
+		var key = _g1[_g];
+		++_g;
+		var obj = json[key];
+		if(manifest.isJsArray(obj)) {
+			var value = ProcessManifest.processManifest(obj);
+			json[key] = value;
+		} else if(manifest.isJsObject(obj)) ProcessManifest.traverseJson(obj);
+	}
+	Utils.pretty(json);
+	return json;
+};
+ProcessManifest.map_manifest = function(file,cb) {
+	var json = FileTools.toJson(file);
+	ProcessManifest.traverseJson(json);
+	cb(null,file);
+};
+ProcessManifest.task = function(options) {
+	return EventStream.map(ProcessManifest.map_manifest);
+};
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
+Reflect.hasField = function(o,field) {
+	return Object.prototype.hasOwnProperty.call(o,field);
+};
 Reflect.field = function(o,field) {
 	try {
 		return o[field];
@@ -290,17 +425,51 @@ Reflect.field = function(o,field) {
 		return null;
 	}
 };
+Reflect.setField = function(o,field,value) {
+	o[field] = value;
+};
 Reflect.callMethod = function(o,func,args) {
 	return func.apply(o,args);
+};
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) a.push(f);
+		}
+	}
+	return a;
 };
 Reflect.isFunction = function(f) {
 	return typeof(f) == "function" && !(js_Boot.isClass(f) || js_Boot.isEnum(f));
 };
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) return true;
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) return false;
+	return f1.scope == f2.scope && f1.method == f2.method && f1.method != null;
+};
+Reflect.isObject = function(v) {
+	if(v == null) return false;
+	var t = typeof(v);
+	return t == "string" || t == "object" && v.__enum__ == null || t == "function" && (js_Boot.isClass(v) || js_Boot.isEnum(v)) != null;
+};
 Reflect.isEnumValue = function(v) {
 	return v != null && v.__enum__ != null;
 };
+Reflect.deleteField = function(o,field) {
+	if(!Reflect.hasField(o,field)) return false;
+	delete(o[field]);
+	return true;
+};
 var Std = function() { };
 Std.__name__ = ["Std"];
+Std["is"] = function(v,t) {
+	return js_Boot.__instanceof(v,t);
+};
+Std.instance = function(value,c) {
+	if((value instanceof c)) return value; else return null;
+};
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
@@ -368,17 +537,57 @@ Test.__name__ = ["Test"];
 Test.main = function() {
 	var r = new nanotest_NanoTestRunner();
 	r.add(new Md5Test({ fileName : "Test.hx", lineNumber : 8, className : "Test", methodName : "main"}));
+	r.add(new ManifestTest({ fileName : "Test.hx", lineNumber : 9, className : "Test", methodName : "main"}));
 	r.run();
 };
+var ValueType = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] };
+ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
+ValueType.TNull.__enum__ = ValueType;
+ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
+ValueType.TInt.__enum__ = ValueType;
+ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
+ValueType.TFloat.__enum__ = ValueType;
+ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
+ValueType.TBool.__enum__ = ValueType;
+ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
+ValueType.TObject.__enum__ = ValueType;
+ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
+ValueType.TFunction.__enum__ = ValueType;
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; };
+ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
+ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { };
 Type.__name__ = ["Type"];
 Type.getClass = function(o) {
 	if(o == null) return null; else return js_Boot.getClass(o);
 };
+Type.getEnum = function(o) {
+	if(o == null) return null;
+	return o.__enum__;
+};
+Type.getSuperClass = function(c) {
+	return c.__super__;
+};
 Type.getClassName = function(c) {
 	var a = c.__name__;
 	if(a == null) return null;
 	return a.join(".");
+};
+Type.getEnumName = function(e) {
+	var a = e.__ename__;
+	return a.join(".");
+};
+Type.createEmptyInstance = function(cl) {
+	function empty() {}; empty.prototype = cl.prototype;
+	return new empty();
 };
 Type.getInstanceFields = function(c) {
 	var a = [];
@@ -386,6 +595,32 @@ Type.getInstanceFields = function(c) {
 	HxOverrides.remove(a,"__class__");
 	HxOverrides.remove(a,"__properties__");
 	return a;
+};
+Type["typeof"] = function(v) {
+	var _g = typeof(v);
+	switch(_g) {
+	case "boolean":
+		return ValueType.TBool;
+	case "string":
+		return ValueType.TClass(String);
+	case "number":
+		if(Math.ceil(v) == v % 2147483648.0) return ValueType.TInt;
+		return ValueType.TFloat;
+	case "object":
+		if(v == null) return ValueType.TNull;
+		var e = v.__enum__;
+		if(e != null) return ValueType.TEnum(e);
+		var c = js_Boot.getClass(v);
+		if(c != null) return ValueType.TClass(c);
+		return ValueType.TObject;
+	case "function":
+		if(js_Boot.isClass(v) || js_Boot.isEnum(v)) return ValueType.TObject;
+		return ValueType.TFunction;
+	case "undefined":
+		return ValueType.TNull;
+	default:
+		return ValueType.TUnknown;
+	}
 };
 Type.enumEq = function(a,b) {
 	if(a == b) return true;
@@ -406,10 +641,28 @@ Type.enumEq = function(a,b) {
 	}
 	return true;
 };
+Type.enumParameters = function(e) {
+	return e.slice(2);
+};
 Type.enumIndex = function(e) {
 	return e[1];
 };
-var haxe_StackItem = { __ename__ : true, __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
+var Utils = function() { };
+Utils.__name__ = ["Utils"];
+Utils.pretty = function(obj) {
+	var p = require('pretty-print');
+	p(obj);
+	return obj;
+};
+var VinylTools = function() { };
+VinylTools.__name__ = ["VinylTools"];
+VinylTools.toVynil = function(path) {
+	{
+		var v = new Vinyl({ cwd : "/", base : PathTools.basePath(path), path : path, contents : new js_node_buffer_Buffer(js_node_Fs.readFileSync(path).toString())});
+		return v;
+	}
+};
+var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe_StackItem.CFunction = ["CFunction",0];
 haxe_StackItem.CFunction.toString = $estr;
 haxe_StackItem.CFunction.__enum__ = haxe_StackItem;
@@ -447,8 +700,67 @@ haxe_CallStack.getStack = function(e) {
 	Error.prepareStackTrace = oldValue;
 	return a;
 };
+haxe_CallStack.callStack = function() {
+	try {
+		throw new Error();
+	} catch( e ) {
+		haxe_CallStack.lastException = e;
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
+		var a = haxe_CallStack.getStack(e);
+		a.shift();
+		return a;
+	}
+};
 haxe_CallStack.exceptionStack = function() {
 	return haxe_CallStack.getStack(haxe_CallStack.lastException);
+};
+haxe_CallStack.toString = function(stack) {
+	var b = new StringBuf();
+	var _g = 0;
+	while(_g < stack.length) {
+		var s = stack[_g];
+		++_g;
+		b.add("\nCalled from ");
+		haxe_CallStack.itemToString(b,s);
+	}
+	return b.toString();
+};
+haxe_CallStack.itemToString = function(b,s) {
+	switch(Type.enumIndex(s)) {
+	case 0:
+		b.add("a C function");
+		break;
+	case 1:
+		var m = s[2];
+		b.add("module ");
+		b.add(m);
+		break;
+	case 2:
+		var line = s[4];
+		var file = s[3];
+		var s1 = s[2];
+		if(s1 != null) {
+			haxe_CallStack.itemToString(b,s1);
+			b.add(" (");
+		}
+		b.add(file);
+		b.add(" line ");
+		b.add(line);
+		if(s1 != null) b.add(")");
+		break;
+	case 3:
+		var meth = s[3];
+		var cname = s[2];
+		b.add(cname);
+		b.add(".");
+		b.add(meth);
+		break;
+	case 4:
+		var n = s[2];
+		b.add("local function #");
+		b.add(n);
+		break;
+	}
 };
 haxe_CallStack.makeStack = function(s) {
 	if(s == null) return []; else if(typeof(s) == "string") {
@@ -476,6 +788,8 @@ haxe_IMap.__name__ = ["haxe","IMap"];
 haxe_IMap.prototype = {
 	get: null
 	,set: null
+	,exists: null
+	,keys: null
 	,__class__: haxe_IMap
 };
 var haxe_ds_StringMap = function() {
@@ -510,6 +824,22 @@ haxe_ds_StringMap.prototype = {
 	,existsReserved: function(key) {
 		if(this.rh == null) return false;
 		return this.rh.hasOwnProperty("$" + key);
+	}
+	,keys: function() {
+		var _this = this.arrayKeys();
+		return HxOverrides.iter(_this);
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) out.push(key);
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) out.push(key.substr(1));
+			}
+		}
+		return out;
 	}
 	,__class__: haxe_ds_StringMap
 };
@@ -671,15 +1001,63 @@ js_Boot.__string_rec = function(o,s) {
 		return String(o);
 	}
 };
+js_Boot.__interfLoop = function(cc,cl) {
+	if(cc == null) return false;
+	if(cc == cl) return true;
+	var intf = cc.__interfaces__;
+	if(intf != null) {
+		var _g1 = 0;
+		var _g = intf.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var i1 = intf[i];
+			if(i1 == cl || js_Boot.__interfLoop(i1,cl)) return true;
+		}
+	}
+	return js_Boot.__interfLoop(cc.__super__,cl);
+};
+js_Boot.__instanceof = function(o,cl) {
+	if(cl == null) return false;
+	switch(cl) {
+	case Int:
+		return (o|0) === o;
+	case Float:
+		return typeof(o) == "number";
+	case Bool:
+		return typeof(o) == "boolean";
+	case String:
+		return typeof(o) == "string";
+	case Array:
+		return (o instanceof Array) && o.__enum__ == null;
+	case Dynamic:
+		return true;
+	default:
+		if(o != null) {
+			if(typeof(cl) == "function") {
+				if(o instanceof cl) return true;
+				if(js_Boot.__interfLoop(js_Boot.getClass(o),cl)) return true;
+			} else if(typeof(cl) == "object" && js_Boot.__isNativeObj(cl)) {
+				if(o instanceof cl) return true;
+			}
+		} else return false;
+		if(cl == Class && o.__name__ != null) return true;
+		if(cl == Enum && o.__ename__ != null) return true;
+		return o.__enum__ == cl;
+	}
+};
 js_Boot.__nativeClassName = function(o) {
 	var name = js_Boot.__toStr.call(o).slice(8,-1);
 	if(name == "Object" || name == "Function" || name == "Math" || name == "JSON") return null;
 	return name;
 };
+js_Boot.__isNativeObj = function(o) {
+	return js_Boot.__nativeClassName(o) != null;
+};
 js_Boot.__resolveNativeClass = function(name) {
 	return (Function("return typeof " + name + " != \"undefined\" ? " + name + " : null"))();
 };
 var js_node_Crypto = require("crypto");
+var js_node_Fs = require("fs");
 var js_node_buffer_Buffer = require("buffer").Buffer;
 var nanotest_NanoTestAssertResult = function(_result,position) {
 	this.result = _result;
@@ -832,7 +1210,7 @@ nanotest_NanoTestRunner.prototype = {
 	}
 	,__class__: nanotest_NanoTestRunner
 };
-var nanotest_NanoTestStatus = { __ename__ : true, __constructs__ : ["SUCCESS","FAIL","ERROR"] };
+var nanotest_NanoTestStatus = { __ename__ : ["nanotest","NanoTestStatus"], __constructs__ : ["SUCCESS","FAIL","ERROR"] };
 nanotest_NanoTestStatus.SUCCESS = function(posInfos) { var $x = ["SUCCESS",0,posInfos]; $x.__enum__ = nanotest_NanoTestStatus; $x.toString = $estr; return $x; };
 nanotest_NanoTestStatus.FAIL = function(message,posInfos) { var $x = ["FAIL",1,message,posInfos]; $x.__enum__ = nanotest_NanoTestStatus; $x.toString = $estr; return $x; };
 nanotest_NanoTestStatus.ERROR = function(message,callStack) { var $x = ["ERROR",2,message,callStack]; $x.__enum__ = nanotest_NanoTestStatus; $x.toString = $estr; return $x; };
@@ -1331,6 +1709,248 @@ thx_ArrayStrings.min = function(arr) {
 		if(v < min) return v; else return min;
 	},arr[0]);
 };
+var thx_Dynamics = function() { };
+thx_Dynamics.__name__ = ["thx","Dynamics"];
+thx_Dynamics.equals = function(a,b) {
+	if(!thx_Types.sameType(a,b)) return false;
+	if(a == b) return true;
+	{
+		var _g = Type["typeof"](a);
+		switch(Type.enumIndex(_g)) {
+		case 2:case 0:case 1:case 3:
+			return false;
+		case 5:
+			return Reflect.compareMethods(a,b);
+		case 6:
+			var c = _g[2];
+			var ca = Type.getClassName(c);
+			var cb = Type.getClassName(Type.getClass(b));
+			if(ca != cb) return false;
+			if(typeof(a) == "string") return false;
+			if((a instanceof Array) && a.__enum__ == null) {
+				var aa = a;
+				var ab = b;
+				if(aa.length != ab.length) return false;
+				var _g2 = 0;
+				var _g1 = aa.length;
+				while(_g2 < _g1) {
+					var i = _g2++;
+					if(!thx_Dynamics.equals(aa[i],ab[i])) return false;
+				}
+				return true;
+			}
+			if(Std["is"](a,Date)) return a.getTime() == b.getTime();
+			if(thx_Maps.isMap(a)) {
+				var ha = a;
+				var hb = b;
+				var ka = thx_Iterators.toArray(ha.keys());
+				var kb = thx_Iterators.toArray(hb.keys());
+				if(ka.length != kb.length) return false;
+				var _g11 = 0;
+				while(_g11 < ka.length) {
+					var key = ka[_g11];
+					++_g11;
+					if(!hb.exists(key) || !thx_Dynamics.equals(ha.get(key),hb.get(key))) return false;
+				}
+				return true;
+			}
+			var t = false;
+			if((t = thx_Iterators.isIterator(a)) || thx_Iterables.isIterable(a)) {
+				var va;
+				if(t) va = thx_Iterators.toArray(a); else va = thx_Iterables.toArray(a);
+				var vb;
+				if(t) vb = thx_Iterators.toArray(b); else vb = thx_Iterables.toArray(b);
+				if(va.length != vb.length) return false;
+				var _g21 = 0;
+				var _g12 = va.length;
+				while(_g21 < _g12) {
+					var i1 = _g21++;
+					if(!thx_Dynamics.equals(va[i1],vb[i1])) return false;
+				}
+				return true;
+			}
+			var f = null;
+			if(Reflect.hasField(a,"equals") && Reflect.isFunction(f = Reflect.field(a,"equals"))) return Reflect.callMethod(a,f,[b]);
+			var fields = Type.getInstanceFields(Type.getClass(a));
+			var _g13 = 0;
+			while(_g13 < fields.length) {
+				var field = fields[_g13];
+				++_g13;
+				var va1 = Reflect.field(a,field);
+				if(Reflect.isFunction(va1)) continue;
+				var vb1 = Reflect.field(b,field);
+				if(!thx_Dynamics.equals(va1,vb1)) return false;
+			}
+			return true;
+		case 7:
+			var e = _g[2];
+			var ea = Type.getEnumName(e);
+			var teb = Type.getEnum(b);
+			var eb = Type.getEnumName(teb);
+			if(ea != eb) return false;
+			if(Type.enumIndex(a) != Type.enumIndex(b)) return false;
+			var pa = Type.enumParameters(a);
+			var pb = Type.enumParameters(b);
+			var _g22 = 0;
+			var _g14 = pa.length;
+			while(_g22 < _g14) {
+				var i2 = _g22++;
+				if(!thx_Dynamics.equals(pa[i2],pb[i2])) return false;
+			}
+			return true;
+		case 4:
+			var fa = Reflect.fields(a);
+			var fb = Reflect.fields(b);
+			var _g15 = 0;
+			while(_g15 < fa.length) {
+				var field1 = fa[_g15];
+				++_g15;
+				HxOverrides.remove(fb,field1);
+				if(!Reflect.hasField(b,field1)) return false;
+				var va2 = Reflect.field(a,field1);
+				if(Reflect.isFunction(va2)) continue;
+				var vb2 = Reflect.field(b,field1);
+				if(!thx_Dynamics.equals(va2,vb2)) return false;
+			}
+			if(fb.length > 0) return false;
+			var t1 = false;
+			if((t1 = thx_Iterators.isIterator(a)) || thx_Iterables.isIterable(a)) {
+				if(t1 && !thx_Iterators.isIterator(b)) return false;
+				if(!t1 && !thx_Iterables.isIterable(b)) return false;
+				var aa1;
+				if(t1) aa1 = thx_Iterators.toArray(a); else aa1 = thx_Iterables.toArray(a);
+				var ab1;
+				if(t1) ab1 = thx_Iterators.toArray(b); else ab1 = thx_Iterables.toArray(b);
+				if(aa1.length != ab1.length) return false;
+				var _g23 = 0;
+				var _g16 = aa1.length;
+				while(_g23 < _g16) {
+					var i3 = _g23++;
+					if(!thx_Dynamics.equals(aa1[i3],ab1[i3])) return false;
+				}
+				return true;
+			}
+			return true;
+		case 8:
+			throw new js__$Boot_HaxeError("Unable to compare two unknown types");
+			break;
+		}
+	}
+	throw new thx_Error("Unable to compare values: " + Std.string(a) + " and " + Std.string(b),null,{ fileName : "Dynamics.hx", lineNumber : 153, className : "thx.Dynamics", methodName : "equals"});
+};
+thx_Dynamics.clone = function(v,cloneInstances) {
+	if(cloneInstances == null) cloneInstances = false;
+	{
+		var _g = Type["typeof"](v);
+		switch(Type.enumIndex(_g)) {
+		case 0:
+			return null;
+		case 1:case 2:case 3:case 7:case 8:case 5:
+			return v;
+		case 4:
+			return thx_Objects.copyTo(v,{ });
+		case 6:
+			var c = _g[2];
+			var name = Type.getClassName(c);
+			switch(name) {
+			case "Array":
+				return v.map(function(v1) {
+					return thx_Dynamics.clone(v1,cloneInstances);
+				});
+			case "String":case "Date":
+				return v;
+			default:
+				if(cloneInstances) {
+					var o = Type.createEmptyInstance(c);
+					var _g1 = 0;
+					var _g2 = Type.getInstanceFields(c);
+					while(_g1 < _g2.length) {
+						var field = _g2[_g1];
+						++_g1;
+						Reflect.setField(o,field,thx_Dynamics.clone(Reflect.field(v,field),cloneInstances));
+					}
+					return o;
+				} else return v;
+			}
+			break;
+		}
+	}
+};
+var thx_DynamicsT = function() { };
+thx_DynamicsT.__name__ = ["thx","DynamicsT"];
+thx_DynamicsT.isEmpty = function(o) {
+	return thx_DynamicsT.size(o) == 0;
+};
+thx_DynamicsT.exists = function(o,name) {
+	return Reflect.hasField(o,name);
+};
+thx_DynamicsT.fields = function(o) {
+	return Reflect.fields(o);
+};
+thx_DynamicsT.merge = function(to,from,replacef) {
+	if(null == replacef) replacef = function(field,oldv,newv) {
+		return newv;
+	};
+	var _g = 0;
+	var _g1 = Reflect.fields(from);
+	while(_g < _g1.length) {
+		var field1 = _g1[_g];
+		++_g;
+		var newv1 = Reflect.field(from,field1);
+		if(Reflect.hasField(to,field1)) Reflect.setField(to,field1,replacef(field1,Reflect.field(to,field1),newv1)); else Reflect.setField(to,field1,newv1);
+	}
+	return to;
+};
+thx_DynamicsT.size = function(o) {
+	return Reflect.fields(o).length;
+};
+thx_DynamicsT.values = function(o) {
+	return Reflect.fields(o).map(function(key) {
+		return Reflect.field(o,key);
+	});
+};
+thx_DynamicsT.tuples = function(o) {
+	return Reflect.fields(o).map(function(key) {
+		var _1 = Reflect.field(o,key);
+		return { _0 : key, _1 : _1};
+	});
+};
+var thx_Error = function(message,stack,pos) {
+	Error.call(this,message);
+	this.message = message;
+	if(null == stack) {
+		try {
+			stack = haxe_CallStack.exceptionStack();
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			stack = [];
+		}
+		if(stack.length == 0) try {
+			stack = haxe_CallStack.callStack();
+		} catch( e1 ) {
+			haxe_CallStack.lastException = e1;
+			if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
+			stack = [];
+		}
+	}
+	this.stackItems = stack;
+	this.pos = pos;
+};
+thx_Error.__name__ = ["thx","Error"];
+thx_Error.fromDynamic = function(err,pos) {
+	if(Std["is"](err,thx_Error)) return err;
+	return new thx_error_ErrorWrapper("" + Std.string(err),err,null,pos);
+};
+thx_Error.__super__ = Error;
+thx_Error.prototype = $extend(Error.prototype,{
+	pos: null
+	,stackItems: null
+	,toString: function() {
+		return this.message + "\nfrom: " + this.pos.className + "." + this.pos.methodName + "() at " + this.pos.lineNumber + "\n\n" + haxe_CallStack.toString(this.stackItems);
+	}
+	,__class__: thx_Error
+});
 var thx_Functions0 = function() { };
 thx_Functions0.__name__ = ["thx","Functions0"];
 thx_Functions0.after = function(callback,n) {
@@ -1544,10 +2164,440 @@ thx_Ints.wrapCircular = function(v,max) {
 	if(v < 0) v += max;
 	return v;
 };
-var thx_Nil = { __ename__ : true, __constructs__ : ["nil"] };
+var thx_Iterables = function() { };
+thx_Iterables.__name__ = ["thx","Iterables"];
+thx_Iterables.all = function(it,predicate) {
+	return thx_Iterators.all($iterator(it)(),predicate);
+};
+thx_Iterables.any = function(it,predicate) {
+	return thx_Iterators.any($iterator(it)(),predicate);
+};
+thx_Iterables.eachPair = function(it,handler) {
+	thx_Iterators.eachPair($iterator(it)(),handler);
+	return;
+};
+thx_Iterables.filter = function(it,predicate) {
+	return thx_Iterators.filter($iterator(it)(),predicate);
+};
+thx_Iterables.find = function(it,predicate) {
+	return thx_Iterators.find($iterator(it)(),predicate);
+};
+thx_Iterables.first = function(it) {
+	return thx_Iterators.first($iterator(it)());
+};
+thx_Iterables.last = function(it) {
+	return thx_Iterators.last($iterator(it)());
+};
+thx_Iterables.isEmpty = function(it) {
+	return thx_Iterators.isEmpty($iterator(it)());
+};
+thx_Iterables.isIterable = function(v) {
+	var fields;
+	if(thx_Types.isAnonymousObject(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"iterator")) return false;
+	return Reflect.isFunction(Reflect.field(v,"iterator"));
+};
+thx_Iterables.map = function(it,f) {
+	return thx_Iterators.map($iterator(it)(),f);
+};
+thx_Iterables.mapi = function(it,f) {
+	return thx_Iterators.mapi($iterator(it)(),f);
+};
+thx_Iterables.order = function(it,sort) {
+	return thx_Iterators.order($iterator(it)(),sort);
+};
+thx_Iterables.reduce = function(it,callback,initial) {
+	return thx_Iterators.reduce($iterator(it)(),callback,initial);
+};
+thx_Iterables.reducei = function(it,callback,initial) {
+	return thx_Iterators.reducei($iterator(it)(),callback,initial);
+};
+thx_Iterables.toArray = function(it) {
+	return thx_Iterators.toArray($iterator(it)());
+};
+thx_Iterables.unzip = function(it) {
+	return thx_Iterators.unzip($iterator(it)());
+};
+thx_Iterables.unzip3 = function(it) {
+	return thx_Iterators.unzip3($iterator(it)());
+};
+thx_Iterables.unzip4 = function(it) {
+	return thx_Iterators.unzip4($iterator(it)());
+};
+thx_Iterables.unzip5 = function(it) {
+	return thx_Iterators.unzip5($iterator(it)());
+};
+thx_Iterables.zip = function(it1,it2) {
+	return thx_Iterators.zip($iterator(it1)(),$iterator(it2)());
+};
+thx_Iterables.zip3 = function(it1,it2,it3) {
+	return thx_Iterators.zip3($iterator(it1)(),$iterator(it2)(),$iterator(it3)());
+};
+thx_Iterables.zip4 = function(it1,it2,it3,it4) {
+	return thx_Iterators.zip4($iterator(it1)(),$iterator(it2)(),$iterator(it3)(),$iterator(it4)());
+};
+thx_Iterables.zip5 = function(it1,it2,it3,it4,it5) {
+	return thx_Iterators.zip5($iterator(it1)(),$iterator(it2)(),$iterator(it3)(),$iterator(it4)(),$iterator(it5)());
+};
+var thx_Iterators = function() { };
+thx_Iterators.__name__ = ["thx","Iterators"];
+thx_Iterators.all = function(it,predicate) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(!predicate(item)) return false;
+	}
+	return true;
+};
+thx_Iterators.any = function(it,predicate) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(predicate(item)) return true;
+	}
+	return false;
+};
+thx_Iterators.eachPair = function(it,handler) {
+	thx_Arrays.eachPair(thx_Iterators.toArray(it),handler);
+};
+thx_Iterators.filter = function(it,predicate) {
+	return thx_Iterators.reduce(it,function(acc,item) {
+		if(predicate(item)) acc.push(item);
+		return acc;
+	},[]);
+};
+thx_Iterators.find = function(it,f) {
+	while( it.hasNext() ) {
+		var item = it.next();
+		if(f(item)) return item;
+	}
+	return null;
+};
+thx_Iterators.first = function(it) {
+	if(it.hasNext()) return it.next(); else return null;
+};
+thx_Iterators.isEmpty = function(it) {
+	return !it.hasNext();
+};
+thx_Iterators.isIterator = function(v) {
+	var fields;
+	if(thx_Types.isAnonymousObject(v)) fields = Reflect.fields(v); else fields = Type.getInstanceFields(Type.getClass(v));
+	if(!Lambda.has(fields,"next") || !Lambda.has(fields,"hasNext")) return false;
+	return Reflect.isFunction(Reflect.field(v,"next")) && Reflect.isFunction(Reflect.field(v,"hasNext"));
+};
+thx_Iterators.last = function(it) {
+	var buf = null;
+	while(it.hasNext()) buf = it.next();
+	return buf;
+};
+thx_Iterators.map = function(it,f) {
+	var acc = [];
+	while( it.hasNext() ) {
+		var v = it.next();
+		acc.push(f(v));
+	}
+	return acc;
+};
+thx_Iterators.mapi = function(it,f) {
+	var acc = [];
+	var i = 0;
+	while( it.hasNext() ) {
+		var v = it.next();
+		acc.push(f(v,i++));
+	}
+	return acc;
+};
+thx_Iterators.order = function(it,sort) {
+	var n = thx_Iterators.toArray(it);
+	n.sort(sort);
+	return n;
+};
+thx_Iterators.reduce = function(it,callback,initial) {
+	thx_Iterators.map(it,function(v) {
+		initial = callback(initial,v);
+	});
+	return initial;
+};
+thx_Iterators.reducei = function(it,callback,initial) {
+	thx_Iterators.mapi(it,function(v,i) {
+		initial = callback(initial,v,i);
+	});
+	return initial;
+};
+thx_Iterators.toArray = function(it) {
+	var items = [];
+	while( it.hasNext() ) {
+		var item = it.next();
+		items.push(item);
+	}
+	return items;
+};
+thx_Iterators.unzip = function(it) {
+	var a1 = [];
+	var a2 = [];
+	thx_Iterators.map(it,function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+	});
+	return { _0 : a1, _1 : a2};
+};
+thx_Iterators.unzip3 = function(it) {
+	var a1 = [];
+	var a2 = [];
+	var a3 = [];
+	thx_Iterators.map(it,function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+		a3.push(t._2);
+	});
+	return { _0 : a1, _1 : a2, _2 : a3};
+};
+thx_Iterators.unzip4 = function(it) {
+	var a1 = [];
+	var a2 = [];
+	var a3 = [];
+	var a4 = [];
+	thx_Iterators.map(it,function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+		a3.push(t._2);
+		a4.push(t._3);
+	});
+	return { _0 : a1, _1 : a2, _2 : a3, _3 : a4};
+};
+thx_Iterators.unzip5 = function(it) {
+	var a1 = [];
+	var a2 = [];
+	var a3 = [];
+	var a4 = [];
+	var a5 = [];
+	thx_Iterators.map(it,function(t) {
+		a1.push(t._0);
+		a2.push(t._1);
+		a3.push(t._2);
+		a4.push(t._3);
+		a5.push(t._4);
+	});
+	return { _0 : a1, _1 : a2, _2 : a3, _3 : a4, _4 : a5};
+};
+thx_Iterators.zip = function(it1,it2) {
+	var array = [];
+	while(it1.hasNext() && it2.hasNext()) array.push((function($this) {
+		var $r;
+		var _0 = it1.next();
+		var _1 = it2.next();
+		$r = { _0 : _0, _1 : _1};
+		return $r;
+	}(this)));
+	return array;
+};
+thx_Iterators.zip3 = function(it1,it2,it3) {
+	var array = [];
+	while(it1.hasNext() && it2.hasNext() && it3.hasNext()) array.push((function($this) {
+		var $r;
+		var _0 = it1.next();
+		var _1 = it2.next();
+		var _2 = it3.next();
+		$r = { _0 : _0, _1 : _1, _2 : _2};
+		return $r;
+	}(this)));
+	return array;
+};
+thx_Iterators.zip4 = function(it1,it2,it3,it4) {
+	var array = [];
+	while(it1.hasNext() && it2.hasNext() && it3.hasNext() && it4.hasNext()) array.push((function($this) {
+		var $r;
+		var _0 = it1.next();
+		var _1 = it2.next();
+		var _2 = it3.next();
+		var _3 = it4.next();
+		$r = { _0 : _0, _1 : _1, _2 : _2, _3 : _3};
+		return $r;
+	}(this)));
+	return array;
+};
+thx_Iterators.zip5 = function(it1,it2,it3,it4,it5) {
+	var array = [];
+	while(it1.hasNext() && it2.hasNext() && it3.hasNext() && it4.hasNext() && it5.hasNext()) array.push((function($this) {
+		var $r;
+		var _0 = it1.next();
+		var _1 = it2.next();
+		var _2 = it3.next();
+		var _3 = it4.next();
+		var _4 = it5.next();
+		$r = { _0 : _0, _1 : _1, _2 : _2, _3 : _3, _4 : _4};
+		return $r;
+	}(this)));
+	return array;
+};
+var thx_Maps = function() { };
+thx_Maps.__name__ = ["thx","Maps"];
+thx_Maps.tuples = function(map) {
+	return thx_Iterators.map(map.keys(),function(key) {
+		var _1 = map.get(key);
+		return { _0 : key, _1 : _1};
+	});
+};
+thx_Maps.mapToObject = function(map) {
+	return thx_Arrays.reduce(thx_Maps.tuples(map),function(o,t) {
+		Reflect.setField(o,t._0,t._1);
+		return o;
+	},{ });
+};
+thx_Maps.getAlt = function(map,key,alt) {
+	var v = map.get(key);
+	if(null == v) return alt; else return v;
+};
+thx_Maps.isMap = function(v) {
+	return Std["is"](v,haxe_IMap);
+};
+var thx_Nil = { __ename__ : ["thx","Nil"], __constructs__ : ["nil"] };
 thx_Nil.nil = ["nil",0];
 thx_Nil.nil.toString = $estr;
 thx_Nil.nil.__enum__ = thx_Nil;
+var thx_Objects = function() { };
+thx_Objects.__name__ = ["thx","Objects"];
+thx_Objects.isEmpty = function(o) {
+	return thx_Objects.size(o) == 0;
+};
+thx_Objects.exists = function(o,name) {
+	return Reflect.hasField(o,name);
+};
+thx_Objects.fields = function(o) {
+	return Reflect.fields(o);
+};
+thx_Objects.merge = function(to,from,replacef) {
+	if(null == replacef) replacef = function(field,oldv,newv) {
+		return newv;
+	};
+	var _g = 0;
+	var _g1 = Reflect.fields(from);
+	while(_g < _g1.length) {
+		var field1 = _g1[_g];
+		++_g;
+		var newv1 = Reflect.field(from,field1);
+		if(Reflect.hasField(to,field1)) Reflect.setField(to,field1,replacef(field1,Reflect.field(to,field1),newv1)); else Reflect.setField(to,field1,newv1);
+	}
+	return to;
+};
+thx_Objects.copyTo = function(src,dst,cloneInstances) {
+	if(cloneInstances == null) cloneInstances = false;
+	var _g = 0;
+	var _g1 = Reflect.fields(src);
+	while(_g < _g1.length) {
+		var field = _g1[_g];
+		++_g;
+		var sv = thx_Dynamics.clone(Reflect.field(src,field),cloneInstances);
+		var dv = Reflect.field(dst,field);
+		if(thx_Types.isAnonymousObject(sv) && thx_Types.isAnonymousObject(dv)) thx_Objects.copyTo(sv,dv); else Reflect.setField(dst,field,sv);
+	}
+	return dst;
+};
+thx_Objects.clone = function(src,cloneInstances) {
+	if(cloneInstances == null) cloneInstances = false;
+	return thx_Dynamics.clone(src,cloneInstances);
+};
+thx_Objects.objectToMap = function(o) {
+	return thx_Arrays.reduce(thx_Objects.tuples(o),function(map,t) {
+		var value = t._1;
+		map.set(t._0,value);
+		return map;
+	},new haxe_ds_StringMap());
+};
+thx_Objects.size = function(o) {
+	return Reflect.fields(o).length;
+};
+thx_Objects.values = function(o) {
+	return Reflect.fields(o).map(function(key) {
+		return Reflect.field(o,key);
+	});
+};
+thx_Objects.tuples = function(o) {
+	return Reflect.fields(o).map(function(key) {
+		var _1 = Reflect.field(o,key);
+		return { _0 : key, _1 : _1};
+	});
+};
+thx_Objects.hasPath = function(o,path) {
+	var paths = path.split(".");
+	var current = o;
+	var _g = 0;
+	while(_g < paths.length) {
+		var currentPath = paths[_g];
+		++_g;
+		if(thx_Strings.isDigitsOnly(currentPath)) {
+			var index = Std.parseInt(currentPath);
+			var arr = Std.instance(current,Array);
+			if(null == arr || arr.length <= index) return false;
+			current = arr[index];
+		} else if(Reflect.hasField(current,currentPath)) current = Reflect.field(current,currentPath); else return false;
+	}
+	return true;
+};
+thx_Objects.hasPathValue = function(o,path) {
+	return thx_Objects.getPath(o,path) != null;
+};
+thx_Objects.getPath = function(o,path) {
+	var paths = path.split(".");
+	var current = o;
+	var _g = 0;
+	while(_g < paths.length) {
+		var currentPath = paths[_g];
+		++_g;
+		if(thx_Strings.isDigitsOnly(currentPath)) {
+			var index = Std.parseInt(currentPath);
+			var arr = Std.instance(current,Array);
+			if(null == arr) return null;
+			current = arr[index];
+		} else if(Reflect.hasField(current,currentPath)) current = Reflect.field(current,currentPath); else return null;
+	}
+	return current;
+};
+thx_Objects.setPath = function(o,path,val) {
+	var paths = path.split(".");
+	var current = o;
+	var _g1 = 0;
+	var _g = paths.length - 1;
+	while(_g1 < _g) {
+		var i = _g1++;
+		var currentPath = paths[i];
+		var nextPath = paths[i + 1];
+		if(thx_Strings.isDigitsOnly(currentPath)) {
+			var index = Std.parseInt(currentPath);
+			if(current[index] == null) {
+				if(thx_Strings.isDigitsOnly(nextPath)) current[index] = []; else current[index] = { };
+			}
+			current = current[index];
+		} else {
+			if(!Reflect.hasField(current,currentPath)) {
+				if(thx_Strings.isDigitsOnly(nextPath)) Reflect.setField(current,currentPath,[]); else Reflect.setField(current,currentPath,{ });
+			}
+			current = Reflect.field(current,currentPath);
+		}
+	}
+	var p = thx_Arrays.last(paths);
+	if(thx_Strings.isDigitsOnly(p)) {
+		var index1 = Std.parseInt(p);
+		current[index1] = val;
+	} else Reflect.setField(current,p,val);
+	return o;
+};
+thx_Objects.removePath = function(o,path) {
+	var paths = path.split(".");
+	var target = paths.pop();
+	try {
+		var sub = thx_Arrays.reduce(paths,function(existing,nextPath) {
+			if(thx_Strings.isDigitsOnly(nextPath)) {
+				var current = existing;
+				var index = Std.parseInt(nextPath);
+				return current[index];
+			} else return Reflect.field(existing,nextPath);
+		},o);
+		if(null != sub) Reflect.deleteField(sub,target);
+	} catch( e ) {
+		haxe_CallStack.lastException = e;
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
+	}
+	return o;
+};
 var thx_Strings = function() { };
 thx_Strings.__name__ = ["thx","Strings"];
 thx_Strings.after = function(value,searchFor) {
@@ -1905,6 +2955,102 @@ thx__$Tuple_Tuple6_$Impl_$.toString = function(this1) {
 thx__$Tuple_Tuple6_$Impl_$.arrayToTuple6 = function(v) {
 	return { _0 : v[0], _1 : v[1], _2 : v[2], _3 : v[3], _4 : v[4], _5 : v[5]};
 };
+var thx_Types = function() { };
+thx_Types.__name__ = ["thx","Types"];
+thx_Types.isAnonymousObject = function(v) {
+	return Reflect.isObject(v) && null == Type.getClass(v);
+};
+thx_Types.isPrimitive = function(v) {
+	{
+		var _g = Type["typeof"](v);
+		switch(Type.enumIndex(_g)) {
+		case 1:case 2:case 3:
+			return true;
+		case 0:case 5:case 7:case 4:case 8:
+			return false;
+		case 6:
+			var c = _g[2];
+			return Type.getClassName(c) == "String";
+		}
+	}
+};
+thx_Types.hasSuperClass = function(cls,sup) {
+	while(null != cls) {
+		if(cls == sup) return true;
+		cls = Type.getSuperClass(cls);
+	}
+	return false;
+};
+thx_Types.sameType = function(a,b) {
+	return thx_Types.valueTypeToString(a) == thx_Types.valueTypeToString(b);
+};
+thx_Types.typeInheritance = function(type) {
+	switch(Type.enumIndex(type)) {
+	case 1:
+		return ["Int"];
+	case 2:
+		return ["Float"];
+	case 3:
+		return ["Bool"];
+	case 4:
+		return ["{}"];
+	case 5:
+		return ["Function"];
+	case 6:
+		var c = type[2];
+		var classes = [];
+		while(null != c) {
+			classes.push(c);
+			c = Type.getSuperClass(c);
+		}
+		return classes.map(Type.getClassName);
+	case 7:
+		var e = type[2];
+		return [Type.getEnumName(e)];
+	default:
+		throw new js__$Boot_HaxeError("invalid type " + Std.string(type));
+	}
+};
+thx_Types.typeToString = function(type) {
+	switch(Type.enumIndex(type)) {
+	case 0:
+		return "Null";
+	case 1:
+		return "Int";
+	case 2:
+		return "Float";
+	case 3:
+		return "Bool";
+	case 4:
+		return "{}";
+	case 5:
+		return "Function";
+	case 6:
+		var c = type[2];
+		return Type.getClassName(c);
+	case 7:
+		var e = type[2];
+		return Type.getEnumName(e);
+	default:
+		throw new js__$Boot_HaxeError("invalid type " + Std.string(type));
+	}
+};
+thx_Types.valueTypeInheritance = function(value) {
+	return thx_Types.typeInheritance(Type["typeof"](value));
+};
+thx_Types.valueTypeToString = function(value) {
+	return thx_Types.typeToString(Type["typeof"](value));
+};
+var thx_error_ErrorWrapper = function(message,innerError,stack,pos) {
+	thx_Error.call(this,message,stack,pos);
+	this.innerError = innerError;
+};
+thx_error_ErrorWrapper.__name__ = ["thx","error","ErrorWrapper"];
+thx_error_ErrorWrapper.__super__ = thx_Error;
+thx_error_ErrorWrapper.prototype = $extend(thx_Error.prototype,{
+	innerError: null
+	,__class__: thx_error_ErrorWrapper
+});
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
@@ -1914,6 +3060,16 @@ if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
 Array.__name__ = ["Array"];
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
+var Int = { __name__ : ["Int"]};
+var Dynamic = { __name__ : ["Dynamic"]};
+var Float = Number;
+Float.__name__ = ["Float"];
+var Bool = Boolean;
+Bool.__ename__ = ["Bool"];
+var Class = { __name__ : ["Class"]};
+var Enum = { };
 if(Array.prototype.map == null) Array.prototype.map = function(f) {
 	var a = [];
 	var _g1 = 0;
@@ -1983,6 +3139,6 @@ thx_Strings.STRIPTAGS = new EReg("</?[a-z]+[^>]*>","gi");
 thx_Strings.WSG = new EReg("[ \t\r\n]+","g");
 thx_Strings.SPLIT_LINES = new EReg("\r\n|\n\r|\n|\r","g");
 Test.main();
-})(typeof console != "undefined" ? console : {log:function(){}});
+})(typeof console != "undefined" ? console : {log:function(){}}, typeof window != "undefined" ? window : exports);
 
 //# sourceMappingURL=test.js.map
