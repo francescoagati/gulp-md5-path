@@ -358,7 +358,7 @@ manifest.traverseJson = function(json,options,__return) {
 manifest.map_manifest = function(options,file,cb) {
 	((function($this) {
 		var $r;
-		var __fn_tmp_36220054_8425115421_3a187f6d1b5f223df3f7717f3bbf7004 = function(__return) {
+		var __fn_tmp_28000335_8376348801_75a2525c37dcb2c66f47894303c20c4d = function(__return) {
 			(function(json) {
 				json;
 				manifest.traverseJson(json,options,function(__parameter_14) {
@@ -369,7 +369,7 @@ manifest.map_manifest = function(options,file,cb) {
 				});
 			})(FileTools.toJson(file));
 		};
-		$r = __fn_tmp_36220054_8425115421_3a187f6d1b5f223df3f7717f3bbf7004;
+		$r = __fn_tmp_28000335_8376348801_75a2525c37dcb2c66f47894303c20c4d;
 		return $r;
 	}(this)))(function() {
 	});
@@ -600,6 +600,9 @@ Utils.pretty = function(obj) {
 };
 var async_$tools_Cps = function() { };
 async_$tools_Cps.__name__ = ["async_tools","Cps"];
+async_$tools_Cps.wait = function(n,cb) {
+	setTimeout(cb,n);
+};
 var com_dongxiguo_continuation_Continuation = function() { };
 com_dongxiguo_continuation_Continuation.__name__ = ["com","dongxiguo","continuation","Continuation"];
 var com_dongxiguo_continuation_ContinuationDetail = function() { };
