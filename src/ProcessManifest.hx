@@ -35,6 +35,7 @@ class ProcessManifest implements Utils.Async {
 
   public static inline function map_manifest(options:ParamsManifest,file:File,cb) {
     cont_exec({
+      trace(file.toString());
       var json = file.toJson();
       json = @await traverseJson(json,options);
       file.setContent(haxe.Json.stringify(json));

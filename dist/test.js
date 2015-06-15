@@ -441,7 +441,8 @@ manifest.traverseJson = function(json,options,__return) {
 manifest.map_manifest = function(options,file,cb) {
 	((function($this) {
 		var $r;
-		var __fn_tmp_31040139_0500428043_c83e69e93eccc5cf5ea82ec802fc3b04 = function(__return) {
+		var __fn_tmp_39542346_4774300531_a8ea11f79597b795c32666f4c902c680 = function(__return) {
+			haxe_Log.trace(FileTools.toString(file),{ fileName : "ProcessManifest.hx", lineNumber : 38, className : "ProcessManifest", methodName : "map_manifest"});
 			(function(json) {
 				json;
 				manifest.traverseJson(json,options,function(__parameter_14) {
@@ -452,7 +453,7 @@ manifest.map_manifest = function(options,file,cb) {
 				});
 			})(FileTools.toJson(file));
 		};
-		$r = __fn_tmp_31040139_0500428043_c83e69e93eccc5cf5ea82ec802fc3b04;
+		$r = __fn_tmp_39542346_4774300531_a8ea11f79597b795c32666f4c902c680;
 		return $r;
 	}(this)))(function() {
 	});
