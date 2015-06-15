@@ -358,7 +358,8 @@ manifest.traverseJson = function(json,options,__return) {
 manifest.map_manifest = function(options,file,cb) {
 	((function($this) {
 		var $r;
-		var __fn_tmp_28000335_8376348801_75a2525c37dcb2c66f47894303c20c4d = function(__return) {
+		var __fn_tmp_55101939_0887671933_ee08608d866bd6d780f82059d996e464 = function(__return) {
+			console.log(FileTools.toString(file));
 			(function(json) {
 				json;
 				manifest.traverseJson(json,options,function(__parameter_14) {
@@ -369,7 +370,7 @@ manifest.map_manifest = function(options,file,cb) {
 				});
 			})(FileTools.toJson(file));
 		};
-		$r = __fn_tmp_28000335_8376348801_75a2525c37dcb2c66f47894303c20c4d;
+		$r = __fn_tmp_55101939_0887671933_ee08608d866bd6d780f82059d996e464;
 		return $r;
 	}(this)))(function() {
 	});
